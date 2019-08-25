@@ -148,3 +148,33 @@ EXPORT int destroyAllWindows() {
 EXPORT void* getWindowHandle(char name[]) {
 	return cvGetWindowHandle(name);
 }
+
+void matToVoid(Mat &src, void **dst)
+{
+	if (*dst == 0)
+		* dst = cvCloneImage(&(IplImage)src);
+	else
+	{
+		IplImage* src_ = (IplImage*)* dst;
+		cvReleaseImage(&src_);
+		*dst = cvCloneImage(&(IplImage)src);
+	}
+}
+
+string  s_CvtColor(void* src, void** dst) {
+
+	string res = "";
+	Mat resImage;
+
+	try {
+		Mat image = cv::cvarrToMat(src);
+		cvtColor(image, resImage, CV_RGB2GRAY);
+	}
+	catch (cv::Exception& e)
+	{
+		return e.what();
+	}
+
+	matToVoid(resImage, dst);
+	return res;
+}
