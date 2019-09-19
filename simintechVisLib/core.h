@@ -21,7 +21,7 @@ EXPORT  int  releaseSourse(void* source);
 EXPORT  int  releaseFrame(void* source);
 
 EXPORT int  copyFrame(void* src, void** dst);
-EXPORT int  convertColor(void* src, void** dst);
+EXPORT int  convertColor(void* src, void** dst, int code);
 
 EXPORT void* createHandledWindow(char name[]);
 EXPORT void* getWindowHandle(char name[]);

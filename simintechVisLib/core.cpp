@@ -113,12 +113,12 @@ EXPORT int copyFrame(void* src, void** dst) {
 	return 0;
 }
 
-EXPORT int  convertColor(void* src, void** dst) {
+EXPORT int  convertColor(void* src, void** dst, int code) {
 
 	if (src == 0)
 		return -1;
 	Mat image = cv::cvarrToMat(src);
-	cvtColor(image, image, CV_RGB2GRAY);
+	cvtColor(image, image, code);
 	if (*dst == 0)
 		* dst = cvCloneImage(&(IplImage)image);
 	else
@@ -129,6 +129,7 @@ EXPORT int  convertColor(void* src, void** dst) {
 	}
 	return 0;
 }
+
 
 EXPORT void* createHandledWindow(char name[]) {
 	namedWindow(name, WINDOW_NORMAL);
