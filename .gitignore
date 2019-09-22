@@ -1,3 +1,17 @@
 
 .vs/
 
+
+LaneDetection/x64/Debug/
+
+LaneDetection/LaneDetection/x64/Debug/
+
+*.vcxproj
+
+*.filters
+
+*.user
+
+LaneDetection/LaneDetection.sln
+
+*.db
