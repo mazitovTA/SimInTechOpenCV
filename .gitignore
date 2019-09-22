@@ -15,3 +15,7 @@ LaneDetection/LaneDetection/x64/Debug/
 LaneDetection/LaneDetection.sln
 
 *.db
+
+LaneDetection/LaneDetection/x64/Release/
+
+LaneDetection/x64/Release/
