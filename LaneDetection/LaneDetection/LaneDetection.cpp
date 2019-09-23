@@ -24,85 +24,7 @@ float h1 = 560; // Расстояние от верхней кромки кад�
 float h2 = 30;  // Расстояние от нижней кромки кадра до Roi по оси Y
 
 
-
-std::vector<float> fit_poly(vector<Point>& pts, int K) {
-
-	std::vector<float> a(K + 1);
-	std::vector<float> b(K + 1);
-
-	int N = pts.size();
-	if (N < K + 1)
-		return a;
-
-	std::vector<std::vector<float> > sums(K + 1);
-	for (int i = 0; i < K + 1; i++) {
-		sums[i].resize(K + 1);
-	}
-
-	int i = 0, j = 0, k = 0;
-
-	//init square sums matrix
-	for (i = 0; i < K + 1; i++) {
-		for (j = 0; j < K + 1; j++) {
-			sums[i][j] = 0;
-			for (k = 0; k < N; k++) {
-				sums[i][j] += pow(pts[k].x, i + j);
-			}
-		}
-	}
-	//init free coefficients column
-	for (i = 0; i < K + 1; i++) {
-		for (k = 0; k < N; k++) {
-			b[i] += pow(pts[k].x, i) * pts[k].y;
-		}
-	}
-
-	float temp = 0;
-	for (i = 0; i < K + 1; i++) {
-		if (sums[i][i] == 0) {
-			for (j = 0; j < K + 1; j++) {
-				if (j == i)
-					continue;
-				if (sums[j][i] != 0 && sums[i][j] != 0) {
-					for (k = 0; k < K + 1; k++) {
-						temp = sums[j][k];
-						sums[j][k] = sums[i][k];
-						sums[i][k] = temp;
-					}
-					temp = b[j];
-					b[j] = b[i];
-					b[i] = temp;
-					break;
-				}
-			}
-		}
-	}
-
-	//process rows
-	for (k = 0; k < K + 1; k++) {
-		for (i = k + 1; i < K + 1; i++) {
-			if (sums[k][k] == 0) {
-				std::cout << "can't fit curve" << std::endl;
-				return a;
-			}
-			float M = sums[i][k] / sums[k][k];
-			for (j = k; j < K + 1; j++) {
-				sums[i][j] -= M * sums[k][j];
-			}
-			b[i] -= M * b[k];
-		}
-	}
-	//printmatrix();
-	for (i = (K + 1) - 1; i >= 0; i--) {
-		float s = 0;
-		for (j = i; j < K + 1; j++) {
-			s = s + sums[i][j] * a[j];
-		}
-		a[i] = (b[i] - s) / sums[i][i];
-	}
-	return a;
-}
-
+///Ransac algorythm for line fitting
 std::vector<float> fitLine(vector<Point>& pts) {
 
 	if (pts.size() < 20)
@@ -205,8 +127,8 @@ Mat filtration(Mat& input)
 		cv::Point(size, size));
 
 	dilate(filter_thresh, filter_thresh, element);
-	bitwise_and(filter_hsv, filter_thresh, filter_res);
 
+	bitwise_and(filter_hsv, filter_thresh, filter_res);
 
 	imshow("Threshold filter", filter_thresh);
 	imshow("Color filter", filter_hsv);
@@ -230,7 +152,7 @@ int main() {
 		if (frame.empty())
 			break;
 		
-		///Roi
+		///Roi - perspective transorm
 		Point2f srcTri[4];
 		srcTri[0] = Point2f(w1 + dx, h1);
 		srcTri[1] = Point2f(frame.cols + dx - w1, h1);
@@ -268,6 +190,7 @@ int main() {
 
 		int leftType = -1;
 		int rightType = -1;
+
 		/// Line Classification
 		/// Left
 		if (leftK.size() > 1) {
