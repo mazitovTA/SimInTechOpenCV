@@ -118,15 +118,9 @@ EXPORT int  convertColor(void* src, void** dst, int code) {
 	if (src == 0)
 		return -1;
 	Mat image = cv::cvarrToMat(src);
-	cvtColor(image, image, code);
-	if (*dst == 0)
-		* dst = cvCloneImage(&(IplImage)image);
-	else
-	{
-		IplImage* src = (IplImage*)* dst;
-		cvReleaseImage(&src);
-		*dst = cvCloneImage(&(IplImage)image);
-	}
+	Mat res;
+	cvtColor(image, res, code);
+	*dst = cvCloneImage(&(IplImage)res);
 	return 0;
 }
 
@@ -178,4 +172,16 @@ string  s_CvtColor(void* src, void** dst) {
 
 	matToVoid(resImage, dst);
 	return res;
+}
+
+cv::Mat test() {
+
+	Mat res(480, 640, CV_8UC3, Scalar(255, 0, 0));
+	return res;
+}
+
+void test1(Mat &im) {
+
+	imshow("im", im);
+	waitKey(0);
 }

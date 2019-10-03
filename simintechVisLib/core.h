@@ -27,3 +27,6 @@ EXPORT void* createHandledWindow(char name[]);
 EXPORT void* getWindowHandle(char name[]);
 EXPORT int destroyWindowByName(char name[]);
 EXPORT int destroyAllWindows();
+
+EXPORT cv::Mat test();
+EXPORT void test1(Mat& im);
