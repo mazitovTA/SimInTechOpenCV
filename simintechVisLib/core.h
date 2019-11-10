@@ -11,6 +11,18 @@
 using namespace cv;
 using namespace std;
 
+struct simMat
+{
+	Mat data;
+
+	~simMat()
+	{
+		data.release();
+	}
+};
+
+EXPORT  void releaseSimMat(void** data);
+
 EXPORT  int openImage(void** frame, char name[]);
 EXPORT  int showFrame(void* source, int delay, char name[]);
 
@@ -20,13 +32,28 @@ EXPORT  int  retrieveImage(void* source, void* frame);
 EXPORT  int  releaseSourse(void* source);
 EXPORT  int  releaseFrame(void* source);
 
-EXPORT int  copyFrame(void* src, void** dst);
-EXPORT int  convertColor(void* src, void** dst, int code);
 
 EXPORT void* createHandledWindow(char name[]);
 EXPORT void* getWindowHandle(char name[]);
 EXPORT int destroyWindowByName(char name[]);
 EXPORT int destroyAllWindows();
 
-EXPORT cv::Mat test();
-EXPORT void test1(Mat& im);
+
+//// Perelement operations
+EXPORT string bitwiseAND(void* src1, void* src2, void** dst);
+EXPORT string bitwiseOR(void* src1, void* src2, void** dst);
+EXPORT string bitwiseNO(void* src1, void* src2, void** dst);
+EXPORT string bitwiseXOR(void* src1, void* src2, void** dst);
+
+EXPORT string perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst);
+EXPORT string perElementDIV(double scale, void* src1, void* src2, void** dst);
+EXPORT string perElementMUL(double scale, void* src1, void* src2, void** dst);
+
+// TODO
+//
+//EXPORT string perElementADDV(void* src1, void* val, void** dst);
+//EXPORT string perElementMULV(void* src1, void* val, void** dst);
+
+//// Matrix operations
+EXPORT string matrixMUL(void* src1, void* src2, void** dst);
+

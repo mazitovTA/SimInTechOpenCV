@@ -1,11 +1,10 @@
 
-#include "pch.h"
-#include "framework.h"
-#include "core.h"
-
 #include <iostream>
 
-using namespace cv;
+#include "pch.h"
+#include "framework.h"
+
+#include "core.h"
 
 bool isNumber(string s)
 {
@@ -13,6 +12,26 @@ bool isNumber(string s)
 		if (isdigit(s[i]) == false)
 			return false;
 	return true;
+}
+
+void matToVoid(Mat& src, void** dst)
+{
+	if (*dst == 0)
+		* dst = cvCloneImage(&(IplImage)src);
+	else
+	{
+		IplImage* src_ = (IplImage*)* dst;
+		cvReleaseImage(&src_);
+		*dst = cvCloneImage(&(IplImage)src);
+	}
+}
+
+EXPORT void releaseSimMat(void** data)
+{
+	if(*data != 0)
+		return
+	((simMat*)* data)->data.release();
+	*data = NULL;
 }
 
 EXPORT  int openImage(void** frame, char name[])
@@ -101,30 +120,6 @@ EXPORT  int  releaseFrame(void* source) {
 }
 
 
-EXPORT int copyFrame(void* src, void** dst) {
-	if (src == 0)
-		return -1;
-	if (*dst != 0)
-	{
-		IplImage* s = (IplImage*)* dst;
-		cvReleaseImage(&s);
-	}
-	*dst = cvCloneImage((IplImage*)src);
-	return 0;
-}
-
-EXPORT int  convertColor(void* src, void** dst, int code) {
-
-	if (src == 0)
-		return -1;
-	Mat image = cv::cvarrToMat(src);
-	Mat res;
-	cvtColor(image, res, code);
-	*dst = cvCloneImage(&(IplImage)res);
-	return 0;
-}
-
-
 EXPORT void* createHandledWindow(char name[]) {
 	namedWindow(name, WINDOW_NORMAL);
 	return cvGetWindowHandle(name);
@@ -144,44 +139,242 @@ EXPORT void* getWindowHandle(char name[]) {
 	return cvGetWindowHandle(name);
 }
 
-void matToVoid(Mat &src, void **dst)
+
+
+string bitwiseAND(void* src1, void* src2, void** dst)
 {
-	if (*dst == 0)
-		* dst = cvCloneImage(&(IplImage)src);
-	else
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
 	{
-		IplImage* src_ = (IplImage*)* dst;
-		cvReleaseImage(&src_);
-		*dst = cvCloneImage(&(IplImage)src);
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		bitwise_and(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
+
 	}
-}
-
-string  s_CvtColor(void* src, void** dst) {
-
-	string res = "";
-	Mat resImage;
-
-	try {
-		Mat image = cv::cvarrToMat(src);
-		cvtColor(image, resImage, CV_RGB2GRAY);
-	}
-	catch (cv::Exception& e)
+	catch (Exception& e)
 	{
+		releaseSimMat(dst);
 		return e.what();
 	}
-
-	matToVoid(resImage, dst);
-	return res;
+	return "0";
 }
 
-cv::Mat test() {
+string bitwiseOR(void* src1, void* src2, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
 
-	Mat res(480, 640, CV_8UC3, Scalar(255, 0, 0));
-	return res;
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		bitwise_or(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
+
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
 }
 
-void test1(Mat &im) {
+string bitwiseNO(void* src1, void* src2, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
 
-	imshow("im", im);
-	waitKey(0);
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		bitwise_not(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
+
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
+string bitwiseXOR(void* src1, void* src2, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		bitwise_xor(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
+
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
+string perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+		addWeighted(((simMat*)src1)->data, *alpha, ((simMat*)src2)->data, *beta, 0, m->data);
+
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
+string perElementDIV(double scale, void* src1, void* src2, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		divide(((simMat*)src1)->data,  ((simMat*)src2)->data, m->data, scale, -1);
+
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
+string perElementMUL(double scale, void* src1, void* src2, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		multiply(((simMat*)src1)->data, ((simMat*)src2)->data, m->data, scale, -1);
+
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+string matrixMUL(void* src1, void* src2, void** dst)
+{
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+		m->data = ((simMat*)src1)->data.mul(((simMat*)src2)->data);
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
+string perElementADDV(void* src1, void* val, void** dst)
+{
+	return string();
+}
+
+string perElementMULV(void* src1, void* val, void** dst)
+{
+	return string();
 }
