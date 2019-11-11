@@ -7,6 +7,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "opencv2/calib3d/calib3d.hpp"
 
 using namespace cv;
 using namespace std;
@@ -51,8 +52,8 @@ EXPORT string perElementMUL(double scale, void* src1, void* src2, void** dst);
 
 // TODO
 //
-//EXPORT string perElementADDV(void* src1, void* val, void** dst);
-//EXPORT string perElementMULV(void* src1, void* val, void** dst);
+EXPORT string perElementADDV(void* src1, float val, void** dst);
+EXPORT string perElementMULV(void* src1, float val, void** dst);
 
 //// Matrix operations
 EXPORT string matrixMUL(void* src1, void* src2, void** dst);

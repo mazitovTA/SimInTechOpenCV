@@ -184,6 +184,57 @@ string sim_roi(void* src, void** dst, int x, int y, int w, int h)
 	return "0";
 }
 
+string sim_inRange(void* src, void** dst, float* low, float* up)
+{
+	if (src == 0)
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		int srcChannels = ((simMat*)src)->data.channels();
+		if (srcChannels > 3)
+			return "0";
+
+		Scalar low, up;
+		if (srcChannels == 1)
+		{
+			low = Scalar(low[0]);
+			low = Scalar(up[0]);
+		}
+		else if (srcChannels == 2)
+		{
+			low = Scalar(low[0], low[1]);
+			low = Scalar(up[0], up[1]);
+		}
+		else if (srcChannels == 3)
+		{
+			low = Scalar(low[0], low[1], low[2]);
+			low = Scalar(up[0], up[1], up[2]);
+		}
+		else
+			return "0";
+
+		inRange(((simMat*)src)->data, low, up, m->data);
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
 string sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double sigmaX, double sigmaY)
 {
 	if (src == 0)
@@ -286,6 +337,38 @@ string sim_blur(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int 
 		}
 
 		blur(((simMat*)src)->data, m->data, Size(ksizeX, ksizeY), Point(anchorX, anchorY), BORDER_DEFAULT);
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
+}
+
+string sim_filter2D(void* src, void** dst, int ddepth, int ksize, float* kernel, int anchorX, int anchorY, double delta)
+{
+	if (src == 0)
+		return "Input data error";
+	try
+	{
+		Mat kernel_ = Mat::ones(ksize, ksize, CV_32F);
+		for (int i = 0; i < ksize * ksize; ++i)
+		{
+			kernel_.data[i] = kernel[i];
+		}
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		filter2D(((simMat*)src)->data, m->data, ddepth, kernel_, Point(anchorX, anchorY), delta, BORDER_DEFAULT);
 	}
 	catch (Exception& e)
 	{
@@ -464,7 +547,7 @@ string sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape)
 		return e.what();
 	}
 
-	return string();
+	return "0";
 }
 
 string sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
@@ -496,7 +579,7 @@ string sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
 		return e.what();
 	}
 
-	return string();
+	return "0";
 }
 
 string sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double fy, int interpolation)
@@ -524,7 +607,7 @@ string sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, dou
 		return e.what();
 	}
 
-	return string();
+	return "0";
 }
 
 string sim_resize(void* src, void** dst, int ksizeX, int ksizeY)
@@ -552,5 +635,114 @@ string sim_resize(void* src, void** dst, int ksizeX, int ksizeY)
 		return e.what();
 	}
 
-	return string();
+	return "0";
+}
+
+string sim_warpAffine(void* src, void** dst,
+	double* M, int dsizeX, int dsizeY,
+	int flags,
+	int borderMode)
+{
+	if (src == 0)
+		return "Input data error";
+
+	try
+	{
+		Mat warp_matrix(2, 3, CV_32F);
+		warp_matrix.data[0] = M[0];
+		warp_matrix.data[1] = M[1];
+		warp_matrix.data[2] = M[2];
+		warp_matrix.data[3] = M[3];
+		warp_matrix.data[4] = M[4];
+		warp_matrix.data[5] = M[5];
+
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		warpAffine(((simMat*)src)->data, m->data, warp_matrix, Size(dsizeX, dsizeY), flags, borderMode);
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+
+	return "0";
+}
+
+
+string sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int dsizeY, int dsizeX)
+{
+	if (src == 0)
+		return "Input data error";
+
+	try
+	{
+		std::vector<cv::Point2f> prev;
+		prev.push_back(cv::Point2f(srcPts[0], srcPts[1]));
+		prev.push_back(cv::Point2f(srcPts[2], srcPts[3]));
+		prev.push_back(cv::Point2f(srcPts[4], srcPts[5]));
+		prev.push_back(cv::Point2f(srcPts[6], srcPts[7]));
+		std::vector<cv::Point2f> post;
+		post.push_back(cv::Point2f(dstPts[0], dstPts[1]));
+		post.push_back(cv::Point2f(dstPts[2], dstPts[3]));
+		post.push_back(cv::Point2f(dstPts[4], srcPts[5]));
+		post.push_back(cv::Point2f(dstPts[6], dstPts[7]));
+		cv::Mat homography = cv::findHomography(prev, post);
+
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+
+		warpPerspective(((simMat*)src)->data, m->data, homography, Size(dsizeX, dsizeY));
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+
+	return "0";
+}
+
+string sim_floodFill(void* src, void** dst, int pX, int pY, uchar color)
+{
+	if (src == 0)
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+		m->data = ((simMat*)src)->data.clone();
+		floodFill(m->data, cv::Point(pX, pY), Scalar(color));
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
 }

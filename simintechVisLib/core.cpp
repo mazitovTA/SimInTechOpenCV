@@ -369,12 +369,56 @@ string matrixMUL(void* src1, void* src2, void** dst)
 	return "0";
 }
 
-string perElementADDV(void* src1, void* val, void** dst)
+string perElementADDV(void* src1, float val, void** dst)
 {
-	return string();
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+		m->data = ((simMat*)src1)->data + val;
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
 }
 
-string perElementMULV(void* src1, void* val, void** dst)
+string perElementMULV(void* src1, float val, void** dst)
 {
-	return string();
+	if ((src1 == 0) || (src1 == 0))
+		return "Input data error";
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+		m->data = ((simMat*)src1)->data * val;
+	}
+	catch (Exception& e)
+	{
+		releaseSimMat(dst);
+		return e.what();
+	}
+	return "0";
 }
