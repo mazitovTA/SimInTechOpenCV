@@ -14,17 +14,6 @@ bool isNumber(string s)
 	return true;
 }
 
-void matToVoid(Mat& src, void** dst)
-{
-	if (*dst == 0)
-		* dst = cvCloneImage(&(IplImage)src);
-	else
-	{
-		IplImage* src_ = (IplImage*)* dst;
-		cvReleaseImage(&src_);
-		*dst = cvCloneImage(&(IplImage)src);
-	}
-}
 
 EXPORT void releaseSimMat(void** data)
 {
@@ -34,73 +23,92 @@ EXPORT void releaseSimMat(void** data)
 	*data = NULL;
 }
 
-EXPORT  int openImage(void** frame, char name[])
+EXPORT string openImage(void** frame, char name[], int code)
 {
-	if (*frame != 0)
+	try
 	{
-		IplImage* src = (IplImage*)* frame;
-		cvReleaseImage(&src);
+		simMat* m = 0;
+		if (*frame == 0)
+		{
+			m = new simMat;
+			*frame = m;
+		}
+		else
+		{
+			m = (simMat*)* frame;
+		}
+		m->data = imread(name, code);
 	}
-	IplImage* src = cvLoadImage(name);
-	if (src == 0)
-		return -1;
-	*frame = src;
-	return 0;
+	catch (Exception& e)
+	{
+		return e.what();
+	}
+	return "0";
 }
 
-EXPORT  int showFrame(void* source, int delay, char name[])
+EXPORT string showFrame(void* source, int delay, char name[])
 {
-	if (source == 0)
-		return -1;
-	cv::Mat src = cv::cvarrToMat(source);
-	if ((src.type() == CV_8UC1) || (src.type() == CV_8UC3))
+	try
 	{
 		void* pt = cvGetWindowHandle(name);
-		if(pt == 0)
+		if (pt == 0)
 			namedWindow(name, WINDOW_NORMAL);
-		imshow(name, src);
+		imshow(name, ((simMat*)source)->data);
 		waitKey(delay);
-		return 0;
+
 	}
-	else
-		return -1;
+	catch (Exception& e)
+	{
+		return e.what();
+	}
+	return "0";
 }
 
-
-EXPORT  int  openVideoSource(void** source, char address[], void** frame)
+EXPORT string openVideoSource(void** source, char address[])
 {
-	VideoCapture* cam = new VideoCapture;
-	*source = cam;
+	try
+	{
+		VideoCapture* cam = new VideoCapture;
+		*source = cam;
 
-	bool res = false;
-	if (isNumber(string(address)))
-		res = cam->open(std::stoi(address));
-	else
-		res = cam->open(address);
-	if (!res)
-		return -1;
-
-	Mat image;
-	cam->grab();
-	cam->retrieve(image);
-	if (image.empty())
-		return -1;
-	*frame = cvCloneImage(&(IplImage)image);
-
-	return 0;
+		bool res = false;
+		if (isNumber(string(address)))
+			res = cam->open(std::stoi(address));
+		else
+			res = cam->open(address);
+	}
+	catch (Exception& e)
+	{
+		return e.what();
+	}
+	return "0";
 }
 
-EXPORT  int  retrieveImage(void* source, void* frame)
+EXPORT  string  retrieveImage(void* source, void** frame)
 {
-	VideoCapture* cam = (VideoCapture*)source;
-	if ((cam == 0) || (frame == 0))
-		return -1;
-	Mat image = cv::cvarrToMat(frame);
-	*cam >> image;
-	if (image.empty())
-		return -1;
-	frame = (&(IplImage)image);
-	return 0;
+	try
+	{
+		VideoCapture* cam = (VideoCapture*)source;
+		if (!cam->isOpened())
+			return "no image source";
+
+		simMat* m = 0;
+		if (*frame == 0)
+		{
+			m = new simMat;
+			*frame = m;
+		}
+		else
+		{
+			m = (simMat*)* frame;
+		}
+		*cam >> m->data;
+	}
+	catch (Exception& e)
+	{
+		return e.what();
+	}
+	return "0";
 }
 
 EXPORT  int  releaseSourse(void* source) {
@@ -110,15 +118,6 @@ EXPORT  int  releaseSourse(void* source) {
 	cam->release();
 	return 0;
 }
-
-EXPORT  int  releaseFrame(void* source) {
-	IplImage* src = (IplImage*)source;
-	if (src == 0)
-		return -1;
-	cvReleaseImage(&src);
-	return 0;
-}
-
 
 EXPORT void* createHandledWindow(char name[]) {
 	namedWindow(name, WINDOW_NORMAL);
@@ -143,7 +142,7 @@ EXPORT void* getWindowHandle(char name[]) {
 
 string bitwiseAND(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -172,7 +171,7 @@ string bitwiseAND(void* src1, void* src2, void** dst)
 
 string bitwiseOR(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -201,7 +200,7 @@ string bitwiseOR(void* src1, void* src2, void** dst)
 
 string bitwiseNO(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -230,7 +229,7 @@ string bitwiseNO(void* src1, void* src2, void** dst)
 
 string bitwiseXOR(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -259,7 +258,7 @@ string bitwiseXOR(void* src1, void* src2, void** dst)
 
 string perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -287,7 +286,7 @@ string perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta
 
 string perElementDIV(double scale, void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -316,7 +315,7 @@ string perElementDIV(double scale, void* src1, void* src2, void** dst)
 
 string perElementMUL(double scale, void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -344,7 +343,7 @@ string perElementMUL(double scale, void* src1, void* src2, void** dst)
 }
 string matrixMUL(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if ((src1 == 0) || (src2 == 0))
 		return "Input data error";
 
 	try
@@ -371,7 +370,7 @@ string matrixMUL(void* src1, void* src2, void** dst)
 
 string perElementADDV(void* src1, float val, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if (src1 == 0)
 		return "Input data error";
 
 	try
@@ -398,7 +397,7 @@ string perElementADDV(void* src1, float val, void** dst)
 
 string perElementMULV(void* src1, float val, void** dst)
 {
-	if ((src1 == 0) || (src1 == 0))
+	if (src1 == 0) 
 		return "Input data error";
 
 	try

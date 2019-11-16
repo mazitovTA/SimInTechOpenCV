@@ -24,15 +24,19 @@ struct simMat
 
 EXPORT  void releaseSimMat(void** data);
 
-EXPORT  int openImage(void** frame, char name[]);
-EXPORT  int showFrame(void* source, int delay, char name[]);
+EXPORT string openImage(void** frame, char name[], int code);
+/*
+Open image from file
+codes
+	IMREAD_GRAYSCALE = 0,  //!< If set, always convert image to the single channel grayscale image (codec internal conversion).
+	IMREAD_COLOR = 1,  //!< If set, always convert image to the 3 channel BGR color image.
+*/
+EXPORT  string showFrame(void* source, int delay, char name[]);
 
-EXPORT  int  openVideoSource(void** source, char address[], void** frame);
-EXPORT  int  retrieveImage(void* source, void* frame);
+EXPORT  string  openVideoSource(void** source, char address[]);
+EXPORT  string  retrieveImage(void* source, void** frame);
 
 EXPORT  int  releaseSourse(void* source);
-EXPORT  int  releaseFrame(void* source);
-
 
 EXPORT void* createHandledWindow(char name[]);
 EXPORT void* getWindowHandle(char name[]);
