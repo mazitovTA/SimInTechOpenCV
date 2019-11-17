@@ -640,8 +640,7 @@ string sim_resize(void* src, void** dst, int ksizeX, int ksizeY)
 
 string sim_warpAffine(void* src, void** dst,
 	double* M, int dsizeX, int dsizeY,
-	int flags,
-	int borderMode)
+	int flags)
 {
 	if (src == 0)
 		return "Input data error";
@@ -667,7 +666,7 @@ string sim_warpAffine(void* src, void** dst,
 			m = (simMat*)* dst;
 		}
 
-		warpAffine(((simMat*)src)->data, m->data, warp_matrix, Size(dsizeX, dsizeY), flags, borderMode);
+		warpAffine(((simMat*)src)->data, m->data, warp_matrix, Size(dsizeX, dsizeY), flags, BORDER_CONSTANT);
 	}
 	catch (Exception& e)
 	{
@@ -690,12 +689,12 @@ string sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, 
 		prev.push_back(cv::Point2f(srcPts[0], srcPts[1]));
 		prev.push_back(cv::Point2f(srcPts[2], srcPts[3]));
 		prev.push_back(cv::Point2f(srcPts[4], srcPts[5]));
-		prev.push_back(cv::Point2f(srcPts[6], srcPts[7]));
+		//prev.push_back(cv::Point2f(srcPts[6], srcPts[7]));
 		std::vector<cv::Point2f> post;
 		post.push_back(cv::Point2f(dstPts[0], dstPts[1]));
 		post.push_back(cv::Point2f(dstPts[2], dstPts[3]));
 		post.push_back(cv::Point2f(dstPts[4], srcPts[5]));
-		post.push_back(cv::Point2f(dstPts[6], dstPts[7]));
+		//post.push_back(cv::Point2f(dstPts[6], dstPts[7]));
 		cv::Mat homography = cv::findHomography(prev, post);
 
 		simMat* m = 0;
@@ -720,7 +719,7 @@ string sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, 
 	return "0";
 }
 
-string sim_floodFill(void* src, void** dst, int pX, int pY, uchar color)
+string sim_floodFill(void* src, void** dst, int pX, int pY, uchar* color)
 {
 	if (src == 0)
 		return "Input data error";
@@ -738,7 +737,7 @@ string sim_floodFill(void* src, void** dst, int pX, int pY, uchar color)
 			m = (simMat*)* dst;
 		}
 		m->data = ((simMat*)src)->data.clone();
-		floodFill(m->data, cv::Point(pX, pY), Scalar(color));
+		floodFill(m->data, cv::Point(pX, pY), Scalar(color[0], color[1], color[2]));
 	}
 	catch (Exception& e)
 	{
