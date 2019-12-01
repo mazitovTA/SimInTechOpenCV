@@ -22,12 +22,18 @@ struct simMat
 	}
 };
 
-EXPORT  void sim_err(char*** err, string& e);
+enum f_result
+{
+	RES_ERROR = -1, 
+	RES_OK = 0
+};
+
+EXPORT void sim_err(char*** err, string& e);
 
 EXPORT void* createHandledWindow(char name[]);
 EXPORT void* getWindowHandle(char name[]);
-EXPORT void releaseSimMat(void** data);
 
+EXPORT int releaseSimMat(void** data);
 
 /*
 Open image from file
@@ -35,27 +41,27 @@ codes
 	IMREAD_GRAYSCALE = 0,  //!< If set, always convert image to the single channel grayscale image (codec internal conversion).
 	IMREAD_COLOR = 1,  //!< If set, always convert image to the 3 channel BGR color image.
 */
-EXPORT void openImage(void** frame, char name[], int code, char** err);
-EXPORT void showFrame(void* source, int delay, char name[], char** err);
-EXPORT void openVideoSource(void** source, char address[], char** err);
-EXPORT void retrieveImage(void* source, void** frame, char** err);
-EXPORT void releaseSourse(void* source, char** err);
-EXPORT void destroyWindowByName(char name[], char** err);
-EXPORT void destroyAllWindows(char** err);
+EXPORT int openImage(void** frame, char name[], int code, char** err);
+EXPORT int showFrame(void* source, int delay, char name[], char** err);
+EXPORT int openVideoSource(void** source, char address[], char** err);
+EXPORT int retrieveImage(void* source, void** frame, char** err);
+EXPORT int releaseSourse(void* source, char** err);
+EXPORT int destroyWindowByName(char name[], char** err);
+EXPORT int destroyAllWindows(char** err);
 
 //// Perelement operations
-EXPORT void bitwiseAND(void* src1, void* src2, void** dst, char** err);
-EXPORT void bitwiseOR(void* src1, void* src2, void** dst, char** err);
-EXPORT void bitwiseNO(void* src, void** dst, char** err);
-EXPORT void bitwiseXOR(void* src1, void* src2, void** dst, char** err);
+EXPORT int bitwiseAND(void* src1, void* src2, void** dst, char** err);
+EXPORT int bitwiseOR(void* src1, void* src2, void** dst, char** err);
+EXPORT int bitwiseNO(void* src, void** dst, char** err);
+EXPORT int bitwiseXOR(void* src1, void* src2, void** dst, char** err);
 
-EXPORT void perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst, char** err);
-EXPORT void perElementDIV(double scale, void* src1, void* src2, void** dst, char** err);
-EXPORT void perElementMUL(double scale, void* src1, void* src2, void** dst, char** err);
+EXPORT int perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst, char** err);
+EXPORT int perElementDIV(double scale, void* src1, void* src2, void** dst, char** err);
+EXPORT int perElementMUL(double scale, void* src1, void* src2, void** dst, char** err);
 
-EXPORT void perElementADDV(void* src1, float val, void** dst, char** err);
-EXPORT void perElementMULV(void* src1, float val, void** dst, char** err);
+EXPORT int perElementADDV(void* src1, float val, void** dst, char** err);
+EXPORT int perElementMULV(void* src1, float val, void** dst, char** err);
 
 //// Matrix operations
-EXPORT void matrixMUL(void* src1, void* src2, void** dst, char** err);
+EXPORT int matrixMUL(void* src1, void* src2, void** dst, char** err);
 

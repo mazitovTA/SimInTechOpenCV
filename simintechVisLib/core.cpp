@@ -30,17 +30,19 @@ void* getWindowHandle(char name[]) {
 	return cvGetWindowHandle(name);
 }
 
-void releaseSimMat(void** data)
+int releaseSimMat(void** data)
 {
-	if(*data != 0)
-		return
+	if (*data != 0)
+		return RES_ERROR;
 	((simMat*)* data)->data.release();
 	*data = NULL;
+	return RES_OK;
+
 }
 
 ////////////////////////////////////////////////////
 
-void openImage(void** frame, char name[], int code, char** err)
+int openImage(void** frame, char name[], int code, char** err)
 {
 	try
 	{
@@ -60,20 +62,20 @@ void openImage(void** frame, char name[], int code, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void showFrame(void* source, int delay, char name[], char** err)
+int showFrame(void* source, int delay, char name[], char** err)
 {
 	try
 	{
 		if (source == 0)
-			return;
+			return RES_ERROR;
 		void* pt = cvGetWindowHandle(name);
 		if (pt == 0)
 			namedWindow(name, WINDOW_NORMAL);
@@ -85,15 +87,15 @@ void showFrame(void* source, int delay, char name[], char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void openVideoSource(void** source, char address[], char** err)
+int openVideoSource(void** source, char address[], char** err)
 {
 	try
 	{
@@ -110,21 +112,21 @@ void openVideoSource(void** source, char address[], char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void retrieveImage(void* source, void** frame, char** err)
+int retrieveImage(void* source, void** frame, char** err)
 {
 	try
 	{
 		VideoCapture* cam = (VideoCapture*)source;
 		if (!cam->isOpened())
-			return;
+			return RES_ERROR;
 
 		simMat* m = 0;
 		if (*frame == 0)
@@ -142,37 +144,37 @@ void retrieveImage(void* source, void** frame, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void releaseSourse(void* source, char** err)
+int releaseSourse(void* source, char** err)
  {
 	try
 	{
 		VideoCapture* cam = (VideoCapture*)source;
 		if (cam == 0)
-			return;
+			return RES_ERROR;
 		cam->release();
 	}
 	catch (Exception& e)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
 
-void destroyWindowByName(char name[], char** err)
+int destroyWindowByName(char name[], char** err)
 {
 	try
 	{
@@ -182,15 +184,15 @@ void destroyWindowByName(char name[], char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void destroyAllWindows(char** err)
+int destroyAllWindows(char** err)
 {
 	try
 	{
@@ -200,21 +202,21 @@ void destroyAllWindows(char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void  bitwiseAND(void* src1, void* src2, void** dst, char** err)
+int  bitwiseAND(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{	
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -237,21 +239,21 @@ void  bitwiseAND(void* src1, void* src2, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void  bitwiseOR(void* src1, void* src2, void** dst, char** err)
+int  bitwiseOR(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -274,21 +276,21 @@ void  bitwiseOR(void* src1, void* src2, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void bitwiseNO(void* src, void** dst, char** err)
+int bitwiseNO(void* src, void** dst, char** err)
 {
 	if ((src == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -311,21 +313,21 @@ void bitwiseNO(void* src, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void bitwiseXOR(void* src1, void* src2, void** dst, char** err)
+int bitwiseXOR(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -348,21 +350,21 @@ void bitwiseXOR(void* src1, void* src2, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, void** dst, char** err)
+int perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -384,21 +386,21 @@ void perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, 
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void perElementDIV(double scale, void* src1, void* src2, void** dst, char** err)
+int perElementDIV(double scale, void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -421,21 +423,21 @@ void perElementDIV(double scale, void* src1, void* src2, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void perElementMUL(double scale, void* src1, void* src2, void** dst, char** err)
+int perElementMUL(double scale, void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -458,22 +460,22 @@ void perElementMUL(double scale, void* src1, void* src2, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
 
-void perElementADDV(void* src1, float val, void** dst, char** err)
+int perElementADDV(void* src1, float val, void** dst, char** err)
 {
 	if (src1 == 0)
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -494,21 +496,21 @@ void perElementADDV(void* src1, float val, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void perElementMULV(void* src1, float val, void** dst, char** err)
+int perElementMULV(void* src1, float val, void** dst, char** err)
 {
 	if (src1 == 0)
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -529,21 +531,21 @@ void perElementMULV(void* src1, float val, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
 
-void matrixMUL(void* src1, void* src2, void** dst, char** err)
+int matrixMUL(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
 	{
 		string exeption = "Input data error";
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	try
@@ -564,10 +566,10 @@ void matrixMUL(void* src1, void* src2, void** dst, char** err)
 	{
 		string exeption = e.what();
 		sim_err(&err, exeption);
-		return;
+		return RES_ERROR;
 	}
 
 	string exeption = "0";
 	sim_err(&err, exeption);
-	return;
+	return RES_OK;
 }
