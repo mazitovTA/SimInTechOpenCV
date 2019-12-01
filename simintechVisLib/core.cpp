@@ -14,8 +14,23 @@ bool isNumber(string s)
 	return true;
 }
 
+void sim_err(char*** err, string& e)
+{
+	if (**err != 0)
+		free(**err);
+	**err = _strdup(e.c_str());
+}
 
-EXPORT void releaseSimMat(void** data)
+void* createHandledWindow(char name[]) {
+	namedWindow(name, WINDOW_NORMAL);
+	return cvGetWindowHandle(name);
+}
+
+void* getWindowHandle(char name[]) {
+	return cvGetWindowHandle(name);
+}
+
+void releaseSimMat(void** data)
 {
 	if(*data != 0)
 		return
@@ -23,7 +38,9 @@ EXPORT void releaseSimMat(void** data)
 	*data = NULL;
 }
 
-EXPORT string openImage(void** frame, char name[], int code)
+////////////////////////////////////////////////////
+
+void openImage(void** frame, char name[], int code, char** err)
 {
 	try
 	{
@@ -41,15 +58,22 @@ EXPORT string openImage(void** frame, char name[], int code)
 	}
 	catch (Exception& e)
 	{
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-EXPORT string showFrame(void* source, int delay, char name[])
+void showFrame(void* source, int delay, char name[], char** err)
 {
 	try
 	{
+		if (source == 0)
+			return;
 		void* pt = cvGetWindowHandle(name);
 		if (pt == 0)
 			namedWindow(name, WINDOW_NORMAL);
@@ -59,12 +83,17 @@ EXPORT string showFrame(void* source, int delay, char name[])
 	}
 	catch (Exception& e)
 	{
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-EXPORT string openVideoSource(void** source, char address[])
+void openVideoSource(void** source, char address[], char** err)
 {
 	try
 	{
@@ -79,18 +108,23 @@ EXPORT string openVideoSource(void** source, char address[])
 	}
 	catch (Exception& e)
 	{
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-EXPORT  string  retrieveImage(void* source, void** frame)
+void retrieveImage(void* source, void** frame, char** err)
 {
 	try
 	{
 		VideoCapture* cam = (VideoCapture*)source;
 		if (!cam->isOpened())
-			return "no image source";
+			return;
 
 		simMat* m = 0;
 		if (*frame == 0)
@@ -106,44 +140,82 @@ EXPORT  string  retrieveImage(void* source, void** frame)
 	}
 	catch (Exception& e)
 	{
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-EXPORT  int  releaseSourse(void* source) {
-	VideoCapture* cam = (VideoCapture*)source;
-	if (cam == 0)
-		return -1;
-	cam->release();
-	return 0;
-}
+void releaseSourse(void* source, char** err)
+ {
+	try
+	{
+		VideoCapture* cam = (VideoCapture*)source;
+		if (cam == 0)
+			return;
+		cam->release();
+	}
+	catch (Exception& e)
+	{
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
+	}
 
-EXPORT void* createHandledWindow(char name[]) {
-	namedWindow(name, WINDOW_NORMAL);
-	return cvGetWindowHandle(name);
-}
-
-EXPORT int destroyWindowByName(char name[]) {
-	cvDestroyWindow(name);
-	return 0;
-}
-
-EXPORT int destroyAllWindows() {	
-	cvDestroyAllWindows();
-	return 0;
-}
-
-EXPORT void* getWindowHandle(char name[]) {
-	return cvGetWindowHandle(name);
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
 
+void destroyWindowByName(char name[], char** err)
+{
+	try
+	{
+		cvDestroyWindow(name);
+	}
+	catch (Exception& e)
+	{
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
+	}
 
-string bitwiseAND(void* src1, void* src2, void** dst)
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
+}
+
+void destroyAllWindows(char** err)
+{
+	try
+	{
+		cvDestroyAllWindows();
+	}
+	catch (Exception& e)
+	{
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
+	}
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
+}
+
+void  bitwiseAND(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	{	
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -163,16 +235,24 @@ string bitwiseAND(void* src1, void* src2, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string bitwiseOR(void* src1, void* src2, void** dst)
+void  bitwiseOR(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -192,16 +272,24 @@ string bitwiseOR(void* src1, void* src2, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string bitwiseNO(void* src1, void* src2, void** dst)
+void bitwiseNO(void* src, void** dst, char** err)
 {
-	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	if ((src == 0))
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -216,21 +304,29 @@ string bitwiseNO(void* src1, void* src2, void** dst)
 			m = (simMat*)* dst;
 		}
 
-		bitwise_not(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
+		bitwise_not(((simMat*)src)->data, m->data);
 
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string bitwiseXOR(void* src1, void* src2, void** dst)
+void bitwiseXOR(void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -250,16 +346,24 @@ string bitwiseXOR(void* src1, void* src2, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, void** dst)
+void perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -278,16 +382,24 @@ string perElementAddWeighted(void* src1, double *alpha, void* src2, double* beta
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string perElementDIV(double scale, void* src1, void* src2, void** dst)
+void perElementDIV(double scale, void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -307,16 +419,24 @@ string perElementDIV(double scale, void* src1, void* src2, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string perElementMUL(double scale, void* src1, void* src2, void** dst)
+void perElementMUL(double scale, void* src1, void* src2, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -336,42 +456,25 @@ string perElementMUL(double scale, void* src1, void* src2, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
-}
-string matrixMUL(void* src1, void* src2, void** dst)
-{
-	if ((src1 == 0) || (src2 == 0))
-		return "Input data error";
 
-	try
-	{
-		simMat* m = 0;
-		if (*dst == 0)
-		{
-			m = new simMat;
-			*dst = m;
-		}
-		else
-		{
-			m = (simMat*)* dst;
-		}
-		m->data = ((simMat*)src1)->data.mul(((simMat*)src2)->data);
-	}
-	catch (Exception& e)
-	{
-		releaseSimMat(dst);
-		return e.what();
-	}
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string perElementADDV(void* src1, float val, void** dst)
+
+void perElementADDV(void* src1, float val, void** dst, char** err)
 {
 	if (src1 == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -389,16 +492,24 @@ string perElementADDV(void* src1, float val, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string perElementMULV(void* src1, float val, void** dst)
+void perElementMULV(void* src1, float val, void** dst, char** err)
 {
-	if (src1 == 0) 
-		return "Input data error";
+	if (src1 == 0)
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -416,8 +527,47 @@ string perElementMULV(void* src1, float val, void** dst)
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
+}
+
+void matrixMUL(void* src1, void* src2, void** dst, char** err)
+{
+	if ((src1 == 0) || (src2 == 0))
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
+
+	try
+	{
+		simMat* m = 0;
+		if (*dst == 0)
+		{
+			m = new simMat;
+			*dst = m;
+		}
+		else
+		{
+			m = (simMat*)* dst;
+		}
+		m->data = ((simMat*)src1)->data.mul(((simMat*)src2)->data);
+	}
+	catch (Exception& e)
+	{
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
+	}
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }

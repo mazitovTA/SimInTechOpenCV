@@ -12,7 +12,7 @@ using namespace std;
 @param dst: output image.
 @param code: Specifies the type of conversion
 */
-EXPORT string sim_convertColor(void* src, void** dst, int code);
+EXPORT void sim_convertColor(void* src, void** dst, int code, char** err);
 
 /** @brief The function applies fixed-level thresholding to a multiple-channel array
 @param src: input image.
@@ -21,7 +21,7 @@ EXPORT string sim_convertColor(void* src, void** dst, int code);
 @param maxval maximum value to use with the #THRESH_BINARY and #THRESH_BINARY_INV thresholding
 @param type: Thresholding type
 */
-EXPORT string sim_threshold(void* src, void** dst, double thresh, double maxval, int type);
+EXPORT void sim_threshold(void* src, void** dst, double thresh, double maxval, int type, char** err);
 
 /** @brief Applies an adaptive threshold to an array.
 @param src: input image.
@@ -36,8 +36,8 @@ pixel: 3, 5, 7, and so on.
 @param C Constant subtracted from the mean or weighted mean (see the details below). Normally, it
 is positive but may be zero or negative as well.
 */
-EXPORT string sim_adaptiveThreshold(void* src, void** dst, double maxValue, int adaptiveMethod,
-	int thresholdType, int blockSize, double C);
+EXPORT void sim_adaptiveThreshold(void* src, void** dst, double maxValue, int adaptiveMethod,
+	int thresholdType, int blockSize, double C, char** err);
 
 /** @brief Creates one 3-channel array out of several single-channel ones.
 @param src1: 1 input channel.
@@ -45,7 +45,7 @@ EXPORT string sim_adaptiveThreshold(void* src, void** dst, double maxValue, int 
 @param src3: 3 input channel.
 @param dst: output image.
 */
-EXPORT string sim_merge(void* src1, void* src2, void* src3, void** dst);
+EXPORT void sim_merge(void* src1, void* src2, void* src3, void** dst, char** err);
 
 /** @brief Divides a 3-channel array into several single-channel arrays.
 @param src1: input channel.
@@ -53,7 +53,7 @@ EXPORT string sim_merge(void* src1, void* src2, void* src3, void** dst);
 @param dst2: 2 output image.
 @param dst3: 3 output image.
 */
-EXPORT string sim_split(void* src1, void** dst1, void** dst2, void** dst3);
+EXPORT void sim_split(void* src1, void** dst1, void** dst2, void** dst3, char** err);
 
 /** @brief Takes rectangle area from image.
 @param src: input image.
@@ -63,7 +63,7 @@ EXPORT string sim_split(void* src1, void** dst1, void** dst2, void** dst3);
 @param h: Height of rectangle
 @param w: Width of rectangle
 */
-EXPORT string sim_roi(void* src, void** dst, int x, int y, int w, int h);
+EXPORT void sim_roi(void* src, void** dst, int x, int y, int w, int h, char** err);
 
 /** @brief Checks if array elements lie between the elements of two other arrays.
 @param src: input array.
@@ -71,7 +71,7 @@ EXPORT string sim_roi(void* src, void** dst, int x, int y, int w, int h);
 @param low: inclusive lower boundary array or a scalar.
 @param up: inclusive upper boundary array or a scalar.
 */
-EXPORT string sim_inRange(void* src, void** dst, float* low, float* up);
+EXPORT void sim_inRange(void* src, void** dst, float* low, float* up, char** err);
 
 /** @brief Blurs an image using a Gaussian filter.
 @param src: input image.
@@ -85,7 +85,7 @@ respectively (see #getGaussianKernel for details); to fully control the result r
 possible future modifications of all this semantics, it is recommended to specify all of ksize,
 sigmaX, and sigmaY.
 */
-EXPORT string sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double sigmaX, double sigmaY);
+EXPORT void sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double sigmaX, double sigmaY, char** err);
 
 /** @brief Applies the bilateral filter to an image.
 @param src: input image.
@@ -100,7 +100,7 @@ farther pixels will influence each other as long as their colors are close enoug
 ). When d\>0, it specifies the neighborhood size regardless of sigmaSpace. Otherwise, d is
 proportional to sigmaSpace.
 */
-EXPORT string sim_bilateralFilter(void* src, void** dst, int d,	double sigmaColor, double sigmaSpace);
+EXPORT void sim_bilateralFilter(void* src, void** dst, int d,	double sigmaColor, double sigmaSpace, char** err);
 
 /** @brief Calculates the normalized sum of squares of the pixel values overlapping the filter.
 @param src input image
@@ -111,9 +111,9 @@ EXPORT string sim_bilateralFilter(void* src, void** dst, int d,	double sigmaColo
 center.
 @param normalize flag, specifying whether the kernel is to be normalized by it's area or not.
 */
-EXPORT string sim_boxFilter(void* src, void** dst, int ddepth,
-	int ksizeX, int ksizeY, int anchorX = -1, int anchorY = -1,
-	bool normalize = true);
+EXPORT void sim_boxFilter(void* src, void** dst, int ddepth,
+	int ksizeX, int ksizeY, int anchorX, int anchorY,
+	bool normalize, char** err);
 
 /** @brief Blurs an image using the normalized box filter.
 @param src input image;
@@ -122,8 +122,8 @@ EXPORT string sim_boxFilter(void* src, void** dst, int ddepth,
 @param anchor anchor point; default value Point(-1,-1) means that the anchor is at the kernel
 center.
  */
-EXPORT string sim_blur(void* src, void** dst,
-	int ksizeX, int ksizeY, int anchorX = -1, int anchorY = -1);
+EXPORT void sim_blur(void* src, void** dst,
+	int ksizeX, int ksizeY, int anchorX, int anchorY, char** err);
 
 /** @brief Convolves an image with the kernel.
 @param src input image.
@@ -140,9 +140,9 @@ is at the kernel center.
 @param borderType pixel extrapolation method, see #BorderTypes
 @sa  sepFilter2D, dft, matchTemplate
  */
-EXPORT string sim_filter2D(void* src, void** dst, int ddepth,
-	int ksize, float *kernel, int anchorX = -1, int anchorY = -1,
-	double delta = 0);
+EXPORT void sim_filter2D(void* src, void** dst, int ddepth,
+	int ksize, float *kernel, int anchorX, int anchorY,
+	double delta, char** err);
 
 /** @brief Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
 @param src input image.
@@ -155,9 +155,9 @@ EXPORT string sim_filter2D(void* src, void** dst, int ddepth,
 applied (see #getDerivKernels for details).
 @param delta optional delta value that is added to the results prior to storing them in dst.
  */
-EXPORT string sim_sobel(void* src, void** dst, int ddepth,
-	int dx, int dy, int ksize = 3,
-	double scale = 1, double delta = 0);
+EXPORT void sim_sobel(void* src, void** dst, int ddepth,
+	int dx, int dy, int ksize,
+	double scale, double delta, char** err);
 
 /** @brief Calculates the first x- or y- image derivative using Scharr operator.
 @param src input image.
@@ -170,8 +170,8 @@ applied (see #getDerivKernels for details).
 @param delta optional delta value that is added to the results prior to storing them in dst.
 @sa  cartToPolar
  */
-EXPORT string sim_scharr(void* src, void** dst, int ddepth,
-	int dx, int dy, double scale = 1, double delta = 0);
+EXPORT void sim_scharr(void* src, void** dst, int ddepth,
+	int dx, int dy, double scale, double delta, char** err);
 
 /** @brief Calculates the Laplacian of an image.
 @param src Source image.
@@ -183,8 +183,8 @@ details. The size must be positive and odd.
 applied. See #getDerivKernels for details.
 @param delta Optional delta value that is added to the results prior to storing them in dst .
  */
-EXPORT string sim_laplacian(void* src, void** dst, int ddepth,
-	int ksize = 1, double scale = 1, double delta = 0);
+EXPORT void sim_laplacian(void* src, void** dst, int ddepth,
+	int ksize, double scale, double delta, char** err);
 
 /** @brief Finds edges in an image using the Canny algorithm 
 @param image 8-bit input image.
@@ -197,8 +197,8 @@ EXPORT string sim_laplacian(void* src, void** dst, int ddepth,
 L2gradient=true ), or whether the default \f$L_1\f$ norm \f$=|dI/dx|+|dI/dy|\f$ is enough (
 L2gradient=false ).
  */
-EXPORT string sim_canny(void* src, void** dst, double threshold1, double threshold2,
-	int apertureSize = 3, bool L2gradient = false);
+EXPORT void sim_canny(void* src, void** dst, double threshold1, double threshold2,
+	int apertureSize, bool L2gradient, char** err);
 
 /** @brief Harris corner detector.
 @param src Input single-channel 8-bit or floating-point image.
@@ -208,8 +208,8 @@ size as src .
 @param ksize Aperture parameter for the Sobel operator.
 @param k Harris detector free parameter.
  */
-EXPORT string sim_cornerHarris(void* src, void** dst, int blockSize,
-	int ksize, double k);
+EXPORT void sim_cornerHarris(void* src, void** dst, int blockSize,
+	int ksize, double k, char** err);
 
 /** @brief Dilates an image by using a specific structuring element.
 @param src input image; the number of channels can be arbitrary, but the depth should be one of
@@ -219,7 +219,7 @@ CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 @param blockSize Size of the structuring element.
 @param ksize Anchor position of structuring Element.
  */
-EXPORT string sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape);
+EXPORT void sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape, char** err);
 
 /** @brief Erodes an image by using a specific structuring element.
 @param src input image; the number of channels can be arbitrary, but the depth should be one of
@@ -229,7 +229,7 @@ CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 @param blockSize Size of the structuring element.
 @param ksize Anchor position of structuring Element.
  */
-EXPORT string sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape);
+EXPORT void sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape, char** err);
 
 
 /** @brief Resizes an image.
@@ -242,8 +242,8 @@ src.size(), fx, and fy; the type of dst is the same as of src.
 @param fy scale factor along the vertical axis; when it equals 0
 @param interpolation interpolation method
  */
-EXPORT string sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx = 0, double fy = 0,
-	int interpolation = INTER_LINEAR);
+EXPORT void sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double,
+	int interpolation, char** err);
 
 /** @brief Resizes an image.
 @param src input image.
@@ -252,7 +252,7 @@ src.size(), fx, and fy; the type of dst is the same as of src.
 @param ksizeX output image size;
 @param ksizeY output image size;
  */
-EXPORT string sim_resize(void* src, void** dst, int ksizeX, int ksizeY);
+EXPORT void sim_resize(void* src, void** dst, int ksizeX, int ksizeY, char** err);
 
 /** @brief Applies a perspective transformation to an image.
 @param src input image.
@@ -261,9 +261,9 @@ EXPORT string sim_resize(void* src, void** dst, int ksizeX, int ksizeY);
 @param dsizeX size of the output image.
 @param dsizeY size of the output image.
  */
-EXPORT string sim_warpAffine(void* src, void** dst,
+EXPORT void sim_warpAffine(void* src, void** dst,
 	double* M, int dsizeX, int dsizeY,
-	int flags = INTER_LINEAR);
+	int flags, char** err);
 
 /** @brief Applies a perspective transformation to an image.
 @param src input image.
@@ -273,8 +273,8 @@ EXPORT string sim_warpAffine(void* src, void** dst,
 @param dsizeX size of the output image.
 @param dsizeY size of the output image.
  */
-EXPORT string sim_warpPerspective(void* src, void** dst,
-	float* srcPts, float* dstPts, int dsizeY, int dsizeX);
+EXPORT void sim_warpPerspective(void* src, void** dst,
+	float* srcPts, float* dstPts, int dsizeY, int dsizeX, char** err);
 
 /** @brief Fills a connected component with the given color.
 @param src input 8-bit 3-channel image.
@@ -283,5 +283,5 @@ EXPORT string sim_warpPerspective(void* src, void** dst,
 @param pY Starting point y coordinate.
 @param color New color 3 uchar values
  */
-EXPORT string sim_floodFill(void* src, void** dst,
-	int pX, int py, uchar* color);
+EXPORT void sim_floodFill(void* src, void** dst,
+	int pX, int py, uchar* color, char** err);

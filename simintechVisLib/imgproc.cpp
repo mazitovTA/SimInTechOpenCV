@@ -3,9 +3,14 @@
 #include "framework.h"
 #include "imgproc.h"
 
-EXPORT string sim_convertColor(void* src, void** dst, int code) {
+void sim_convertColor(void* src, void** dst, int code, char** err)
+{
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -26,16 +31,23 @@ EXPORT string sim_convertColor(void* src, void** dst, int code) {
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
-
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_threshold(void* src, void** dst, double thresh, double maxval, int type)
+void sim_threshold(void* src, void** dst, double thresh, double maxval, int type, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -56,15 +68,24 @@ string sim_threshold(void* src, void** dst, double thresh, double maxval, int ty
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_adaptiveThreshold(void* src, void** dst, double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C)
+void sim_adaptiveThreshold(void* src, void** dst, double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -84,16 +105,25 @@ string sim_adaptiveThreshold(void* src, void** dst, double maxValue, int adaptiv
 	}
 	catch (Exception& e)
 	{
-		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_merge(void* src1, void* src2, void* src3, void** dst)
+void sim_merge(void* src1, void* src2, void* src3, void** dst, char** err)
 {
 	if ((src1 == 0) || (src2 == 0) || (src3 == 0))
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
+
 	try
 	{
 		vector<Mat> channels;
@@ -116,15 +146,24 @@ string sim_merge(void* src1, void* src2, void* src3, void** dst)
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_split(void* src, void** dst1, void** dst2, void** dst3)
+void sim_split(void* src, void** dst1, void** dst2, void** dst3, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 	try
 	{
 
@@ -151,15 +190,23 @@ string sim_split(void* src, void** dst1, void** dst2, void** dst3)
 		releaseSimMat(dst1);
 		releaseSimMat(dst2);
 		releaseSimMat(dst3);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_roi(void* src, void** dst, int x, int y, int w, int h)
+void sim_roi(void* src, void** dst, int x, int y, int w, int h, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -179,15 +226,24 @@ string sim_roi(void* src, void** dst, int x, int y, int w, int h)
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_inRange(void* src, void** dst, float* low, float* up)
+void sim_inRange(void* src, void** dst, float* low, float* up, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -204,7 +260,11 @@ string sim_inRange(void* src, void** dst, float* low, float* up)
 
 		int srcChannels = ((simMat*)src)->data.channels();
 		if (srcChannels > 3)
-			return "0";
+		{
+			string exeption = "Input data error";
+			sim_err(&err, exeption);
+			return;
+		}
 
 		Scalar low, up;
 		if (srcChannels == 1)
@@ -222,23 +282,29 @@ string sim_inRange(void* src, void** dst, float* low, float* up)
 			low = Scalar(low[0], low[1], low[2]);
 			low = Scalar(up[0], up[1], up[2]);
 		}
-		else
-			return "0";
-
 		inRange(((simMat*)src)->data, low, up, m->data);
 	}
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double sigmaX, double sigmaY)
+void sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double sigmaX, double sigmaY, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -258,15 +324,24 @@ string sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double si
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_bilateralFilter(void* src, void** dst, int d, double sigmaColor, double sigmaSpace)
+void sim_bilateralFilter(void* src, void** dst, int d, double sigmaColor, double sigmaSpace, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -286,14 +361,24 @@ string sim_bilateralFilter(void* src, void** dst, int d, double sigmaColor, doub
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
-string sim_boxFilter(void* src, void** dst, int ddepth, int ksizeX, int ksizeY, int anchorX, int anchorY, bool normalize)
+
+void sim_boxFilter(void* src, void** dst, int ddepth, int ksizeX, int ksizeY, int anchorX, int anchorY, bool normalize, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -313,15 +398,24 @@ string sim_boxFilter(void* src, void** dst, int ddepth, int ksizeX, int ksizeY, 
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_blur(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int anchorY)
+void sim_blur(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int anchorY, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -341,15 +435,24 @@ string sim_blur(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int 
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_filter2D(void* src, void** dst, int ddepth, int ksize, float* kernel, int anchorX, int anchorY, double delta)
+void sim_filter2D(void* src, void** dst, int ddepth, int ksize, float* kernel, int anchorX, int anchorY, double delta, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 	try
 	{
 		Mat kernel_ = Mat::ones(ksize, ksize, CV_32F);
@@ -373,15 +476,24 @@ string sim_filter2D(void* src, void** dst, int ddepth, int ksize, float* kernel,
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_sobel(void* src, void** dst, int ddepth, int dx, int dy, int ksize, double scale, double delta)
+void sim_sobel(void* src, void** dst, int ddepth, int dx, int dy, int ksize, double scale, double delta, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -401,15 +513,24 @@ string sim_sobel(void* src, void** dst, int ddepth, int dx, int dy, int ksize, d
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_scharr(void* src, void** dst, int ddepth, int dx, int dy, double scale, double delta)
+void sim_scharr(void* src, void** dst, int ddepth, int dx, int dy, double scale, double delta, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -429,15 +550,24 @@ string sim_scharr(void* src, void** dst, int ddepth, int dx, int dy, double scal
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_laplacian(void* src, void** dst, int ddepth, int ksize, double scale, double delta)
+void sim_laplacian(void* src, void** dst, int ddepth, int ksize, double scale, double delta, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -457,15 +587,24 @@ string sim_laplacian(void* src, void** dst, int ddepth, int ksize, double scale,
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_canny(void* src, void** dst, double threshold1, double threshold2, int apertureSize, bool L2gradient)
+void sim_canny(void* src, void** dst, double threshold1, double threshold2, int apertureSize, bool L2gradient, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -485,15 +624,24 @@ string sim_canny(void* src, void** dst, double threshold1, double threshold2, in
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_cornerHarris(void* src, void** dst, int blockSize, int ksize, double k)
+void sim_cornerHarris(void* src, void** dst, int blockSize, int ksize, double k, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -513,15 +661,24 @@ string sim_cornerHarris(void* src, void** dst, int blockSize, int ksize, double 
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
-	return "0";
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape)
+void sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -544,16 +701,24 @@ string sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape)
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
 
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
+void sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -576,16 +741,24 @@ string sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
 
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double fy, int interpolation)
+void sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double fy, int interpolation, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -604,16 +777,24 @@ string sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, dou
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
 
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_resize(void* src, void** dst, int ksizeX, int ksizeY)
+void sim_resize(void* src, void** dst, int ksizeX, int ksizeY, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -632,18 +813,26 @@ string sim_resize(void* src, void** dst, int ksizeX, int ksizeY)
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
 
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_warpAffine(void* src, void** dst,
+void sim_warpAffine(void* src, void** dst,
 	double* M, int dsizeX, int dsizeY,
-	int flags)
+	int flags, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -671,17 +860,25 @@ string sim_warpAffine(void* src, void** dst,
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
 
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
 
-string sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int dsizeY, int dsizeX)
+void sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int dsizeY, int dsizeX, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -713,16 +910,24 @@ string sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, 
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
 
-	return "0";
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }
 
-string sim_floodFill(void* src, void** dst, int pX, int pY, uchar* color)
+void sim_floodFill(void* src, void** dst, int pX, int pY, uchar* color, char** err)
 {
 	if (src == 0)
-		return "Input data error";
+	{	
+		string exeption = "Input data error";
+		sim_err(&err, exeption);
+		return;
+	}
 
 	try
 	{
@@ -742,6 +947,12 @@ string sim_floodFill(void* src, void** dst, int pX, int pY, uchar* color)
 	catch (Exception& e)
 	{
 		releaseSimMat(dst);
-		return e.what();
+		string exeption = e.what();
+		sim_err(&err, exeption);
+		return;
 	}
+
+	string exeption = "0";
+	sim_err(&err, exeption);
+	return;
 }

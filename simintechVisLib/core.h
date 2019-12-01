@@ -22,43 +22,40 @@ struct simMat
 	}
 };
 
-EXPORT  void releaseSimMat(void** data);
+EXPORT  void sim_err(char*** err, string& e);
 
-EXPORT string openImage(void** frame, char name[], int code);
+EXPORT void* createHandledWindow(char name[]);
+EXPORT void* getWindowHandle(char name[]);
+EXPORT void releaseSimMat(void** data);
+
+
 /*
 Open image from file
 codes
 	IMREAD_GRAYSCALE = 0,  //!< If set, always convert image to the single channel grayscale image (codec internal conversion).
 	IMREAD_COLOR = 1,  //!< If set, always convert image to the 3 channel BGR color image.
 */
-EXPORT  string showFrame(void* source, int delay, char name[]);
-
-EXPORT  string  openVideoSource(void** source, char address[]);
-EXPORT  string  retrieveImage(void* source, void** frame);
-
-EXPORT  int  releaseSourse(void* source);
-
-EXPORT void* createHandledWindow(char name[]);
-EXPORT void* getWindowHandle(char name[]);
-EXPORT int destroyWindowByName(char name[]);
-EXPORT int destroyAllWindows();
-
+EXPORT void openImage(void** frame, char name[], int code, char** err);
+EXPORT void showFrame(void* source, int delay, char name[], char** err);
+EXPORT void openVideoSource(void** source, char address[], char** err);
+EXPORT void retrieveImage(void* source, void** frame, char** err);
+EXPORT void releaseSourse(void* source, char** err);
+EXPORT void destroyWindowByName(char name[], char** err);
+EXPORT void destroyAllWindows(char** err);
 
 //// Perelement operations
-EXPORT string bitwiseAND(void* src1, void* src2, void** dst);
-EXPORT string bitwiseOR(void* src1, void* src2, void** dst);
-EXPORT string bitwiseNO(void* src1, void* src2, void** dst);
-EXPORT string bitwiseXOR(void* src1, void* src2, void** dst);
+EXPORT void bitwiseAND(void* src1, void* src2, void** dst, char** err);
+EXPORT void bitwiseOR(void* src1, void* src2, void** dst, char** err);
+EXPORT void bitwiseNO(void* src, void** dst, char** err);
+EXPORT void bitwiseXOR(void* src1, void* src2, void** dst, char** err);
 
-EXPORT string perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst);
-EXPORT string perElementDIV(double scale, void* src1, void* src2, void** dst);
-EXPORT string perElementMUL(double scale, void* src1, void* src2, void** dst);
+EXPORT void perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst, char** err);
+EXPORT void perElementDIV(double scale, void* src1, void* src2, void** dst, char** err);
+EXPORT void perElementMUL(double scale, void* src1, void* src2, void** dst, char** err);
 
-// TODO
-//
-EXPORT string perElementADDV(void* src1, float val, void** dst);
-EXPORT string perElementMULV(void* src1, float val, void** dst);
+EXPORT void perElementADDV(void* src1, float val, void** dst, char** err);
+EXPORT void perElementMULV(void* src1, float val, void** dst, char** err);
 
 //// Matrix operations
-EXPORT string matrixMUL(void* src1, void* src2, void** dst);
+EXPORT void matrixMUL(void* src1, void* src2, void** dst, char** err);
 
