@@ -109,13 +109,26 @@ int sim_split(void* src, void** dst1, void** dst2, void** dst3)
 	simMat* ch2 = 0;
 	simMat* ch3 = 0;
 
-	if (*dst1 == 0) { ch1 = new simMat; }
-	if (*dst2 == 0) { ch2 = new simMat; }
-	if (*dst3 == 0) { ch3 = new simMat; }
+	ch1 = new simMat;
+	ch2 = new simMat;
+	ch3 = new simMat;
 
 	ch1->data = bgr[0];
 	ch2->data = bgr[1];
 	ch3->data = bgr[2];
+
+	if (*dst1 != 0)
+	{
+		releaseSimMat(dst1);
+	}
+	if (*dst2 != 0)
+	{
+		releaseSimMat(dst2);
+	}
+	if (*dst3 != 0)
+	{
+		releaseSimMat(dst3);
+	}
 
 	*dst1 = ch1;
 	*dst2 = ch2;
@@ -168,8 +181,6 @@ int sim_inRange(void* src, void** dst, float* low, float* up)
 	int srcChannels = ((simMat*)src)->data.channels();
 	if (srcChannels > 3)
 	{
-
-
 		return RES_ERROR;
 	}
 
@@ -569,13 +580,16 @@ int sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int
 	prev.push_back(cv::Point2f(srcPts[0], srcPts[1]));
 	prev.push_back(cv::Point2f(srcPts[2], srcPts[3]));
 	prev.push_back(cv::Point2f(srcPts[4], srcPts[5]));
-	//prev.push_back(cv::Point2f(srcPts[6], srcPts[7]));
+	prev.push_back(cv::Point2f(srcPts[6], srcPts[7]));
 	std::vector<cv::Point2f> post;
 	post.push_back(cv::Point2f(dstPts[0], dstPts[1]));
 	post.push_back(cv::Point2f(dstPts[2], dstPts[3]));
 	post.push_back(cv::Point2f(dstPts[4], srcPts[5]));
-	//post.push_back(cv::Point2f(dstPts[6], dstPts[7]));
-	cv::Mat homography = cv::findHomography(prev, post);
+	post.push_back(cv::Point2f(dstPts[6], dstPts[7]));
+
+	cv::Mat warp_mat = getPerspectiveTransform(prev, post);
+	//cv::Mat homography = cv::findHomography(prev, post);
+
 
 	simMat* m = 0;
 	if (*dst == 0)
@@ -588,7 +602,8 @@ int sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int
 		m = (simMat*)* dst;
 	}
 
-	warpPerspective(((simMat*)src)->data, m->data, homography, Size(dsizeX, dsizeY));
+	//warpPerspective(((simMat*)src)->data, m->data, homography, Size(dsizeX, dsizeY));
+	warpPerspective(((simMat*)src)->data, m->data, warp_mat, Size(dsizeX, dsizeY), CV_INTER_LINEAR,	BORDER_CONSTANT, Scalar(0, 0, 0));
 
 	return RES_OK;
 }

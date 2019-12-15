@@ -16,11 +16,11 @@ int vl = 180;
 int vh = 255;
 
 /// Roi 
-float w1 = 520; // расстояние от левой кромки кадра до верхней левой точки Roi по оси Х
-float w2 = 305; // расстояние от левой кромки кадра до нижней левой точки Roi по оси Х
-float dx = -50; // Смещение Roi по оси Х
+float w1 = 360; // расстояние от левой кромки кадра до верхней левой точки Roi по оси Х
+float w2 = 280; // расстояние от левой кромки кадра до нижней левой точки Roi по оси Х
+float dx = 0; // Смещение Roi по оси Х
 
-float h1 = 560; // Расстояние от верхней кромки кадра до Roi по оси Y
+float h1 = 300; // Расстояние от верхней кромки кадра до Roi по оси Y
 float h2 = 30;  // Расстояние от нижней кромки кадра до Roi по оси Y
 
 
@@ -138,7 +138,7 @@ Mat filtration(Mat& input)
 
 int main() {
 
-	VideoCapture cap("v1.mp4");
+	VideoCapture cap("C:/Techsmith.mp4");
 
 	if (!cap.isOpened()) {
 		cout << "Error opening video stream or file" << endl;
@@ -284,9 +284,10 @@ int main() {
 			putText(warp_dst, "solid", cv::Point(250, 25), cv::FONT_HERSHEY_COMPLEX_SMALL, 1.0, cv::Scalar(0, 255, 0), 1, CV_AA);
 
 
-		imshow("Res filter", filter_res);				
-		imshow("frame", frame);
+		imshow("Res filter", filter_res);
 		imshow("ROI", warp_dst);
+		
+		imshow("frame", frame);
 
 		char c = (char)waitKey(0);
 		if (c == 27)
