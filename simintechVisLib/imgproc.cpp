@@ -104,35 +104,44 @@ int sim_split(void* src, void** dst1, void** dst2, void** dst3)
 		return RES_ERROR;
 	}
 	Mat bgr[3];   //destination array
-	split(((simMat*)src)->data, bgr);//split source 
+
 	simMat* ch1 = 0;
+	if (*dst1 == 0)
+	{
+		ch1 = new simMat;
+		*dst1 = ch1;
+	}
+	else
+	{
+		ch1 = (simMat*)* dst1;
+	}
+
 	simMat* ch2 = 0;
+	if (*dst2 == 0)
+	{
+		ch2 = new simMat;
+		*dst2 = ch2;
+	}
+	else
+	{
+		ch2 = (simMat*)* dst2;
+	}
+
 	simMat* ch3 = 0;
+	if (*dst3 == 0)
+	{
+		ch3 = new simMat;
+		*dst3 = ch3;
+	}
+	else
+	{
+		ch3 = (simMat*)* dst3;
+	}
 
-	ch1 = new simMat;
-	ch2 = new simMat;
-	ch3 = new simMat;
-
+	split(((simMat*)src)->data, bgr);//split source 
 	ch1->data = bgr[0];
 	ch2->data = bgr[1];
 	ch3->data = bgr[2];
-
-	if (*dst1 != 0)
-	{
-		releaseSimMat(dst1);
-	}
-	if (*dst2 != 0)
-	{
-		releaseSimMat(dst2);
-	}
-	if (*dst3 != 0)
-	{
-		releaseSimMat(dst3);
-	}
-
-	*dst1 = ch1;
-	*dst2 = ch2;
-	*dst3 = ch3;
 
 	return RES_OK;
 }
@@ -160,7 +169,7 @@ int sim_roi(void* src, void** dst, int x, int y, int w, int h)
 	return RES_OK;
 }
 
-int sim_inRange(void* src, void** dst, float* low, float* up)
+int sim_inRange(void* src, void** dst, double low, double up)
 {
 	if (src == 0)
 	{
@@ -187,19 +196,20 @@ int sim_inRange(void* src, void** dst, float* low, float* up)
 	Scalar lowB, upB;
 	if (srcChannels == 1)
 	{
-		lowB = Scalar(low[0]);
-		lowB = Scalar(up[0]);
+		lowB = Scalar(low);
+		upB = Scalar(up);
 	}
 	else if (srcChannels == 2)
 	{
-		lowB = Scalar(low[0], low[1]);
-		lowB = Scalar(up[0], up[1]);
+		lowB = Scalar(low, low);
+		upB = Scalar(up, up);
 	}
 	else if (srcChannels == 3)
 	{
-		lowB = Scalar(low[0], low[1], low[2]);
-		lowB = Scalar(up[0], up[1], up[2]);
+		lowB = Scalar(low, low, low);
+		upB = Scalar(up, up, up);
 	}
+
 	inRange(((simMat*)src)->data, lowB, upB, m->data);
 
 	return RES_OK;
@@ -223,7 +233,12 @@ int sim_gaussianBlur(void* src, void** dst, int ksizeX, int ksizeY, double sigma
 		m = (simMat*)* dst;
 	}
 
-	GaussianBlur(((simMat*)src)->data, m->data, Size(ksizeX, ksizeY), sigmaX, sigmaY, BORDER_DEFAULT);
+	int kx;
+	int	ky;
+	ksizeX < 2 ? kx = 2 : kx = ksizeX;
+	ksizeY < 2 ? ky = 2 : ky = ksizeY;
+
+	GaussianBlur(((simMat*)src)->data, m->data, Size(kx, ky), sigmaX, sigmaY, BORDER_DEFAULT);
 	return RES_OK;
 }
 
@@ -251,7 +266,7 @@ int sim_bilateralFilter(void* src, void** dst, int d, double sigmaColor, double 
 	return RES_OK;
 }
 
-int sim_boxFilter(void* src, void** dst, int ddepth, int ksizeX, int ksizeY, int anchorX, int anchorY, bool normalize)
+int sim_boxFilter(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int anchorY, bool normalize)
 {
 	if (src == 0)
 	{
@@ -269,12 +284,14 @@ int sim_boxFilter(void* src, void** dst, int ddepth, int ksizeX, int ksizeY, int
 		m = (simMat*)* dst;
 	}
 
-	boxFilter(((simMat*)src)->data, m->data, ddepth, Size(ksizeX, ksizeY), Point(anchorX, anchorY), normalize, BORDER_DEFAULT);
+	ksizeX < 2 ? ksizeY = 2 : ksizeX;
+	ksizeY < 2 ? ksizeY = 2 : ksizeY;
+	boxFilter(((simMat*)src)->data, m->data, -1, Size(ksizeX, ksizeY), Point(anchorX, anchorY), normalize, BORDER_DEFAULT);
 
 	return RES_OK;
 }
 
-int sim_blur(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int anchorY)
+int sim_blur(void* src, void** dst, int ksizeX, int ksizeY)
 {
 	if (src == 0)
 	{
@@ -292,12 +309,17 @@ int sim_blur(void* src, void** dst, int ksizeX, int ksizeY, int anchorX, int anc
 		m = (simMat*)* dst;
 	}
 
-	blur(((simMat*)src)->data, m->data, Size(ksizeX, ksizeY), Point(anchorX, anchorY), BORDER_DEFAULT);
+	int kx;
+	int	ky;
+	ksizeX < 2 ? kx = 2 : kx = ksizeX;
+	ksizeY < 2 ? ky = 2 : ky = ksizeY;
+
+	blur(((simMat*)src)->data, m->data, Size(kx, ky), Point(-1, -1), BORDER_DEFAULT);
 
 	return RES_OK;
 }
 
-int sim_filter2D(void* src, void** dst, int ddepth, int ksize, float* kernel, int anchorX, int anchorY, double delta)
+int sim_filter2D(void* src, void** dst, int ksize, double* kernel, int anchorX, int anchorY, double delta)
 {
 	if (src == 0)
 	{
@@ -319,12 +341,13 @@ int sim_filter2D(void* src, void** dst, int ddepth, int ksize, float* kernel, in
 		m = (simMat*)* dst;
 	}
 
+	int ddepth = CV_16S;
 	filter2D(((simMat*)src)->data, m->data, ddepth, kernel_, Point(anchorX, anchorY), delta, BORDER_DEFAULT);
 
 	return RES_OK;
 }
 
-int sim_sobel(void* src, void** dst, int ddepth, int dx, int dy, int ksize, double scale, double delta)
+int sim_sobel(void* src, void** dst, int dx, int dy, int ksize, double scale, double delta)
 {
 	if (src == 0)
 	{
@@ -341,13 +364,23 @@ int sim_sobel(void* src, void** dst, int ddepth, int dx, int dy, int ksize, doub
 	{
 		m = (simMat*)* dst;
 	}
-
+	dx < 0 ? dx = 0 : dx;
+	dy < 0 ? dy = 0 : dy;
+	dx > 1 ? dx = 1 : dx;
+	dy > 1 ? dy = 1 : dy;	
+	if (dx + dx < 0)
+	{
+		dx = 1;
+		dy = 0;
+	}
+	ksize < 3 ? ksize = 3 : ksize;
+	int ddepth = CV_16S;
 	Sobel(((simMat*)src)->data, m->data, ddepth, dx, dy, ksize, scale, delta, BORDER_DEFAULT);
 
 	return RES_OK;
 }
 
-int sim_scharr(void* src, void** dst, int ddepth, int dx, int dy, double scale, double delta)
+int sim_scharr(void* src, void** dst, int dx, int dy, double scale, double delta)
 {
 	if (src == 0)
 	{
@@ -365,12 +398,22 @@ int sim_scharr(void* src, void** dst, int ddepth, int dx, int dy, double scale, 
 		m = (simMat*)* dst;
 	}
 
+	dx < 0 ? dx = 0 : dx;
+	dy < 0 ? dy = 0 : dy;
+	dx > 1 ? dx = 1 : dx;
+	dy > 1 ? dy = 1 : dy;
+	if (dx + dx < 0)
+	{
+		dx = 1;
+		dy = 0;
+	}
+	int ddepth = CV_16S;
 	Scharr(((simMat*)src)->data, m->data, ddepth, dx, dy, scale, delta, BORDER_DEFAULT);
 
 	return RES_OK;
 }
 
-int sim_laplacian(void* src, void** dst, int ddepth, int ksize, double scale, double delta)
+int sim_laplacian(void* src, void** dst, int ksize, double scale, double delta)
 {
 	if (src == 0)
 	{
@@ -388,6 +431,8 @@ int sim_laplacian(void* src, void** dst, int ddepth, int ksize, double scale, do
 		m = (simMat*)* dst;
 	}
 
+	ksize < 3 ? ksize = 3 : ksize;
+	int ddepth = CV_16S;
 	Laplacian(((simMat*)src)->data, m->data, ddepth, ksize, scale, delta, BORDER_DEFAULT);
 
 	return RES_OK;
@@ -411,8 +456,10 @@ int sim_canny(void* src, void** dst, double threshold1, double threshold2, int a
 		m = (simMat*)* dst;
 	}
 
+	if (apertureSize < 3) apertureSize = 3;
+	else if (apertureSize > 7) apertureSize = 7;
+	else if (apertureSize != 3 && apertureSize != 7) apertureSize = 5;
 	Canny(((simMat*)src)->data, m->data, threshold1, threshold2, apertureSize, L2gradient);
-
 
 	return RES_OK;
 }
@@ -436,6 +483,8 @@ int sim_cornerHarris(void* src, void** dst, int blockSize, int ksize, double k)
 	}
 
 	cornerHarris(((simMat*)src)->data, m->data, blockSize, ksize, k, BORDER_DEFAULT);
+	normalize(m->data, m->data, 0, 255, NORM_MINMAX, CV_32FC1, Mat());
+	convertScaleAbs(m->data, m->data);
 
 	return RES_OK;
 }
@@ -457,7 +506,8 @@ int sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape)
 	{
 		m = (simMat*)* dst;
 	}
-
+	if (ksize < 1) ksize = 1;
+	if (blockSize < 1) blockSize = 1;
 	Mat element = getStructuringElement(kShape,
 		Size(2 * blockSize + 1, 2 * blockSize + 1),
 		Point(ksize, ksize));
@@ -484,6 +534,8 @@ int sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
 		m = (simMat*)* dst;
 	}
 
+	if (ksize < 1) ksize = 1;
+	if (blockSize < 1) blockSize = 1;
 	Mat element = getStructuringElement(kShape,
 		Size(2 * blockSize + 1, 2 * blockSize + 1),
 		Point(ksize, ksize));
@@ -492,7 +544,7 @@ int sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
 	return RES_OK;
 }
 
-int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double fy, int interpolation)
+int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, int interpolation)
 {
 	if (src == 0)
 	{
@@ -509,7 +561,7 @@ int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double
 	{
 		m = (simMat*)* dst;
 	}
-	resize(((simMat*)src)->data, m->data, Size(ksizeX, ksizeY), fx, fy, interpolation);
+	resize(((simMat*)src)->data, m->data, Size(ksizeX, ksizeY), 1, 1, interpolation);
 
 	return RES_OK;
 }
@@ -569,7 +621,7 @@ int sim_warpAffine(void* src, void** dst,
 	return RES_OK;
 }
 
-int sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int dsizeY, int dsizeX)
+int sim_warpPerspective(void* src, void** dst, double* srcPts, double* dstPts, int dsizeY, int dsizeX)
 {
 	if (src == 0)
 	{
@@ -608,7 +660,7 @@ int sim_warpPerspective(void* src, void** dst, float* srcPts, float* dstPts, int
 	return RES_OK;
 }
 
-int sim_floodFill(void* src, void** dst, int pX, int pY, uchar* color)
+int sim_floodFill(void* src, void** dst, int pX, int pY, int ch1, int ch2, int ch3)
 {
 	if (src == 0)
 	{
@@ -626,7 +678,16 @@ int sim_floodFill(void* src, void** dst, int pX, int pY, uchar* color)
 		m = (simMat*)* dst;
 	}
 	m->data = ((simMat*)src)->data.clone();
-	floodFill(m->data, cv::Point(pX, pY), Scalar(color[0], color[1], color[2]));
+
+	Scalar col;
+	int srcChannels = ((simMat*)src)->data.channels();
+	if (srcChannels == 1)
+		col = Scalar(ch1);
+	else if (srcChannels == 3)
+		col = Scalar(ch1, ch2, ch3);
+	else
+		return RES_ERROR;
+	floodFill(m->data, cv::Point(pX, pY), col);
 
 	return RES_OK;
 }

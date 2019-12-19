@@ -37,7 +37,6 @@ int releaseSimMat(void** data)
 
 int openImage(void** frame, char name[], int code)
 {
-
 	simMat* m = 0;
 	if (*frame == 0)
 	{
@@ -57,7 +56,7 @@ int openImage(void** frame, char name[], int code)
 
 int showFrame(void* source, int delay, char name[])
 {
-	if (source == 0)
+	if ((source == 0) || (!((simMat*)source)->data.data))
 		return RES_ERROR;
 	void* pt = cvGetWindowHandle(name);
 	if (pt == 0)
@@ -131,7 +130,7 @@ int destroyAllWindows()
 
 int  bitwiseAND(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -151,7 +150,7 @@ int  bitwiseAND(void* src1, void* src2, void** dst)
 
 int  bitwiseOR(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 	simMat* m = 0;
 	if (*dst == 0)
@@ -170,7 +169,7 @@ int  bitwiseOR(void* src1, void* src2, void** dst)
 
 int bitwiseNO(void* src, void** dst)
 {
-	if ((src == 0))
+	if ((src == 0) || (!((simMat*)src)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -190,7 +189,7 @@ int bitwiseNO(void* src, void** dst)
 
 int bitwiseXOR(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -208,9 +207,9 @@ int bitwiseXOR(void* src1, void* src2, void** dst)
 	return RES_OK;
 }
 
-int perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst)
+int perElementAddWeighted(void* src1, double alpha, void* src2, double beta, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -223,13 +222,13 @@ int perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, v
 	{
 		m = (simMat*)* dst;
 	}
-	addWeighted(((simMat*)src1)->data, *alpha, ((simMat*)src2)->data, *beta, 0, m->data);
+	addWeighted(((simMat*)src1)->data, alpha, ((simMat*)src2)->data, beta, 0, m->data);
 	return RES_OK;
 }
 
-int perElementDIV(double scale, void* src1, void* src2, void** dst)
+int absDiff(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -243,13 +242,13 @@ int perElementDIV(double scale, void* src1, void* src2, void** dst)
 		m = (simMat*)* dst;
 	}
 
-	divide(((simMat*)src1)->data, ((simMat*)src2)->data, m->data, scale, -1);
+	absdiff(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
 	return RES_OK;
 }
 
 int perElementMUL(double scale, void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -268,11 +267,11 @@ int perElementMUL(double scale, void* src1, void* src2, void** dst)
 	return RES_OK;
 }
 
-
-int perElementADDV(void* src1, float val, void** dst)
+int perElementADD(void* src1, void* src2, void** dst)
 {
-	if (src1 == 0)
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
+
 	simMat* m = 0;
 	if (*dst == 0)
 	{
@@ -283,14 +282,34 @@ int perElementADDV(void* src1, float val, void** dst)
 	{
 		m = (simMat*)* dst;
 	}
-	m->data = ((simMat*)src1)->data + val;
+
+	add(((simMat*)src1)->data, ((simMat*)src2)->data, m->data);
 
 	return RES_OK;
 }
 
-int perElementMULV(void* src1, float val, void** dst)
+int perElementADDV(void* src, double val, void** dst)
 {
-	if (src1 == 0)
+	if ((src == 0) || (!((simMat*)src)->data.data))
+		return RES_ERROR;
+	simMat* m = 0;
+	if (*dst == 0)
+	{
+		m = new simMat;
+		*dst = m;
+	}
+	else
+	{
+		m = (simMat*)* dst;
+	}
+	m->data = ((simMat*)src)->data + val;
+
+	return RES_OK;
+}
+
+int perElementMULV(void* src, double val, void** dst)
+{
+	if ((src == 0) || (!((simMat*)src)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;
@@ -303,14 +322,14 @@ int perElementMULV(void* src1, float val, void** dst)
 	{
 		m = (simMat*)* dst;
 	}
-	m->data = ((simMat*)src1)->data * val;
+	m->data = ((simMat*)src)->data * val;
 
 	return RES_OK;
 }
 
 int matrixMUL(void* src1, void* src2, void** dst)
 {
-	if ((src1 == 0) || (src2 == 0))
+	if ((src1 == 0) || (src2 == 0) || (!((simMat*)src1)->data.data) || (!((simMat*)src2)->data.data))
 		return RES_ERROR;
 
 	simMat* m = 0;

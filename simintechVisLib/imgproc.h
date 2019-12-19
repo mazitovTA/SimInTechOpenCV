@@ -71,7 +71,7 @@ EXPORT int sim_roi(void* src, void** dst, int x, int y, int w, int h);
 @param low: inclusive lower boundary array or a scalar.
 @param up: inclusive upper boundary array or a scalar.
 */
-EXPORT int sim_inRange(void* src, void** dst, float* low, float* up);
+EXPORT int sim_inRange(void* src, void** dst, double low, double up);
 
 /** @brief Blurs an image using a Gaussian filter.
 @param src: input image.
@@ -105,13 +105,12 @@ EXPORT int sim_bilateralFilter(void* src, void** dst, int d,	double sigmaColor, 
 /** @brief Calculates the normalized sum of squares of the pixel values overlapping the filter.
 @param src input image
 @param dst output image of the same size and type as _src
-@param ddepth the output image depth (-1 to use src.depth())
 @param ksize kernel size
 @param anchor kernel anchor point. The default value of Point(-1, -1) denotes that the anchor is at the kernel
 center.
 @param normalize flag, specifying whether the kernel is to be normalized by it's area or not.
 */
-EXPORT int sim_boxFilter(void* src, void** dst, int ddepth,
+EXPORT int sim_boxFilter(void* src, void** dst, 
 	int ksizeX, int ksizeY, int anchorX, int anchorY,
 	bool normalize);
 
@@ -123,31 +122,23 @@ EXPORT int sim_boxFilter(void* src, void** dst, int ddepth,
 center.
  */
 EXPORT int sim_blur(void* src, void** dst,
-	int ksizeX, int ksizeY, int anchorX, int anchorY);
+	int ksizeX, int ksizeY);
 
 /** @brief Convolves an image with the kernel.
 @param src input image.
 @param dst output image of the same size and the same number of channels as src.
-@param ddepth desired depth of the destination image, see @ref filter_depths "combinations"
 @param ksize number of elements of convolution kernel matrix
 @param kernel convolution kernel (or rather a correlation kernel), a single-channel floating point
 matrix; if you want to apply different kernels to different channels, split the image into
 separate color planes using split and process them individually.
-@param anchor anchor of the kernel that indicates the relative position of a filtered point within
-the kernel; the anchor should lie within the kernel; default value (-1,-1) means that the anchor
-is at the kernel center.
-@param delta optional value added to the filtered pixels before storing them in dst.
-@param borderType pixel extrapolation method, see #BorderTypes
-@sa  sepFilter2D, dft, matchTemplate
  */
-EXPORT int sim_filter2D(void* src, void** dst, int ddepth,
-	int ksize, float *kernel, int anchorX, int anchorY,
+EXPORT int sim_filter2D(void* src, void** dst,
+	int ksize, double*kernel, int anchorX, int anchorY,
 	double delta);
 
 /** @brief Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
 @param src input image.
 @param dst output image of the same size and the same number of channels as src .
-@param ddepth output image depth
 @param dx order of the derivative x.
 @param dy order of the derivative y.
 @param ksize size of the extended Sobel kernel; it must be 1, 3, 5, or 7.
@@ -155,14 +146,14 @@ EXPORT int sim_filter2D(void* src, void** dst, int ddepth,
 applied (see #getDerivKernels for details).
 @param delta optional delta value that is added to the results prior to storing them in dst.
  */
-EXPORT int sim_sobel(void* src, void** dst, int ddepth,
+
+EXPORT int sim_sobel(void* src, void** dst, 
 	int dx, int dy, int ksize,
 	double scale, double delta);
 
 /** @brief Calculates the first x- or y- image derivative using Scharr operator.
 @param src input image.
 @param dst output image of the same size and the same number of channels as src.
-@param ddepth output image depth, see @ref filter_depths "combinations"
 @param dx order of the derivative x.
 @param dy order of the derivative y.
 @param scale optional scale factor for the computed derivative values; by default, no scaling is
@@ -170,20 +161,19 @@ applied (see #getDerivKernels for details).
 @param delta optional delta value that is added to the results prior to storing them in dst.
 @sa  cartToPolar
  */
-EXPORT int sim_scharr(void* src, void** dst, int ddepth,
+EXPORT int sim_scharr(void* src, void** dst,
 	int dx, int dy, double scale, double delta);
 
 /** @brief Calculates the Laplacian of an image.
 @param src Source image.
 @param dst Destination image of the same size and the same number of channels as src .
-@param ddepth Desired depth of the destination image.
 @param ksize Aperture size used to compute the second-derivative filters. See #getDerivKernels for
 details. The size must be positive and odd.
 @param scale Optional scale factor for the computed Laplacian values. By default, no scaling is
 applied. See #getDerivKernels for details.
 @param delta Optional delta value that is added to the results prior to storing them in dst .
  */
-EXPORT int sim_laplacian(void* src, void** dst, int ddepth,
+EXPORT int sim_laplacian(void* src, void** dst,
 	int ksize, double scale, double delta);
 
 /** @brief Finds edges in an image using the Canny algorithm 
@@ -242,8 +232,7 @@ src.size(), fx, and fy; the type of dst is the same as of src.
 @param fy scale factor along the vertical axis; when it equals 0
 @param interpolation interpolation method
  */
-EXPORT int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, double fx, double,
-	int interpolation);
+EXPORT int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, int interpolation);
 
 /** @brief Resizes an image.
 @param src input image.
@@ -274,7 +263,7 @@ EXPORT int sim_warpAffine(void* src, void** dst,
 @param dsizeY size of the output image.
  */
 EXPORT int sim_warpPerspective(void* src, void** dst,
-	float* srcPts, float* dstPts, int dsizeY, int dsizeX);
+	double* srcPts, double* dstPts, int dsizeY, int dsizeX);
 
 /** @brief Fills a connected component with the given color.
 @param src input 8-bit 3-channel image.
@@ -284,4 +273,4 @@ EXPORT int sim_warpPerspective(void* src, void** dst,
 @param color New color 3 uchar values
  */
 EXPORT int sim_floodFill(void* src, void** dst,
-	int pX, int py, uchar* color);
+	int pX, int py, int ch1, int ch2, int ch3);

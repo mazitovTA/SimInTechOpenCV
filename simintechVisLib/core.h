@@ -54,12 +54,14 @@ EXPORT int bitwiseOR(void* src1, void* src2, void** dst);
 EXPORT int bitwiseNO(void* src, void** dst);
 EXPORT int bitwiseXOR(void* src1, void* src2, void** dst);
 
-EXPORT int perElementAddWeighted(void* src1, double* alpha, void* src2, double* beta, void** dst);
-EXPORT int perElementDIV(double scale, void* src1, void* src2, void** dst);
+EXPORT int perElementAddWeighted(void* src1, double alpha, void* src2, double beta, void** dst);
 EXPORT int perElementMUL(double scale, void* src1, void* src2, void** dst);
 
-EXPORT int perElementADDV(void* src1, float val, void** dst);
-EXPORT int perElementMULV(void* src1, float val, void** dst);
+EXPORT int absDiff(void* src1, void* src2, void** dst);
+
+EXPORT int perElementADD(void* src1, void* src2, void** dst);
+EXPORT int perElementADDV(void* src1, double val, void** dst);
+EXPORT int perElementMULV(void* src1, double val, void** dst);
 
 //// Matrix operations
 EXPORT int matrixMUL(void* src1, void* src2, void** dst);
