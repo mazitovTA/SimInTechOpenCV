@@ -209,7 +209,7 @@ CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 @param blockSize Size of the structuring element.
 @param ksize Anchor position of structuring Element.
  */
-EXPORT int sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape);
+EXPORT int sim_dilate(void* src, void** dst, int ksize, int kShape);
 
 /** @brief Erodes an image by using a specific structuring element.
 @param src input image; the number of channels can be arbitrary, but the depth should be one of
@@ -219,7 +219,7 @@ CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 @param blockSize Size of the structuring element.
 @param ksize Anchor position of structuring Element.
  */
-EXPORT int sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape);
+EXPORT int sim_erode(void* src, void** dst, int ksize, int kShape);
 
 
 /** @brief Resizes an image.

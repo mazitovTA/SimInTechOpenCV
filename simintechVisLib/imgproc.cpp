@@ -489,7 +489,7 @@ int sim_cornerHarris(void* src, void** dst, int blockSize, int ksize, double k)
 	return RES_OK;
 }
 
-int sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape)
+int sim_dilate(void* src, void** dst, int ksize, int kShape)
 {
 	if (src == 0)
 	{
@@ -506,17 +506,16 @@ int sim_dilate(void* src, void** dst, int blockSize, int ksize, int kShape)
 	{
 		m = (simMat*)* dst;
 	}
-	if (ksize < 1) ksize = 1;
-	if (blockSize < 1) blockSize = 1;
+	if (ksize < 1) ksize = 1;	
 	Mat element = getStructuringElement(kShape,
-		Size(2 * blockSize + 1, 2 * blockSize + 1),
+		Size(2 * ksize + 1, 2 * ksize + 1),
 		Point(ksize, ksize));
 	dilate(((simMat*)src)->data, m->data, element);
 
 	return RES_OK;
 }
 
-int sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
+int sim_erode(void* src, void** dst, int ksize, int kShape)
 {
 	if (src == 0)
 	{
@@ -535,9 +534,8 @@ int sim_erode(void* src, void** dst, int blockSize, int ksize, int kShape)
 	}
 
 	if (ksize < 1) ksize = 1;
-	if (blockSize < 1) blockSize = 1;
 	Mat element = getStructuringElement(kShape,
-		Size(2 * blockSize + 1, 2 * blockSize + 1),
+		Size(2 * ksize + 1, 2 * ksize + 1),
 		Point(ksize, ksize));
 	erode(((simMat*)src)->data, m->data, element);
 
