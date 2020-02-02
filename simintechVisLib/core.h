@@ -22,6 +22,45 @@ struct simMat
 	}
 };
 
+struct VectorMat {
+	std::vector<Mat> data;
+	~VectorMat()
+	{
+		data.clear();
+	}
+};
+
+struct VectorPoint {
+	std::vector<cv::Point> data;
+	~VectorPoint()
+	{
+		data.clear();
+	}
+};
+
+struct VectorPoint2f {
+	std::vector<cv::Point> data;
+	~VectorPoint2f()
+	{
+		data.clear();
+	}
+};
+
+struct VectorVectorPoint2f {
+	std::vector < std::vector<cv::Point2f>> data;
+	~VectorVectorPoint2f()
+	{
+		data.clear();
+	}
+};
+
+struct VectorVectorPoint3f {
+	std::vector< std::vector<cv::Point3f>> data;
+	~VectorVectorPoint3f()
+	{
+		data.clear();
+	}
+};
 enum f_result
 {
 	RES_ERROR = -1, 
@@ -65,3 +104,15 @@ EXPORT int perElementMULV(void* src1, double val, void** dst);
 
 //// Matrix operations
 EXPORT int matrixMUL(void* src1, void* src2, void** dst);
+
+
+//// Camera calibration functions
+int fidnCalibrationPoints(void** image_points, void** object_points, void* image, int numCornersHor, int numCornersVer);
+
+int sim_undistort(void* image, void** imageUndistorted, void* intrinsic, void* distCoeffs);
+
+int sim_calibrateCamera(void* image_points, void* object_points, void* image, void** intrinsic, void** distCoeffs);
+
+
+int sim_saveCalibrationParameters(char name[], void** intrinsic, void** distCoeffs);
+int sim_loadCalibrationParameters(char name[], void** intrinsic, void** distCoeffs);
