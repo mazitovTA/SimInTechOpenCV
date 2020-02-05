@@ -5,6 +5,14 @@
 #include "framework.h"
 
 #include "core.h"
+#include <fstream>
+
+bool is_file_exist(const char* fileName)
+{
+	std::ifstream infile(fileName);
+	return infile.good();
+}
+
 
 bool isNumber(string s)
 {
@@ -352,29 +360,20 @@ int fidnCalibrationPoints(void** image_points, void** object_points, void* image
 	{
 		return RES_ERROR;
 	}
-
+	   
 	VectorVectorPoint2f* im_points = 0;
+	if (*image_points == 0)
 	{
-		im_points = new VectorVectorPoint2f;
+		*image_points = new VectorVectorPoint2f;
 	}
-	if (*image_points != 0)
-	{
-		for (int i = 0; i < ((VectorVectorPoint2f*)* image_points)->data.size(); i++)
-			im_points->data.push_back(((VectorVectorPoint2f*)* image_points)->data[i]);
-	}
-	*image_points = im_points;
+	im_points = (VectorVectorPoint2f*)* image_points;
 
 	VectorVectorPoint3f* obj_points = 0;
+	if (*object_points == 0)
 	{
-		obj_points = new VectorVectorPoint3f;
+		*object_points = new VectorVectorPoint3f;
 	}
-	if (*object_points != 0)
-	{
-		for (int i = 0; i < ((VectorVectorPoint3f*)* object_points)->data.size(); i++)
-			obj_points->data.push_back(((VectorVectorPoint3f*)* object_points)->data[i]);
-	}
-	*object_points = obj_points;
-
+	obj_points = (VectorVectorPoint3f*)* object_points;
 
 	Size board_sz = Size(numCornersHor, numCornersVer);
 	int numSquares = numCornersHor * numCornersVer;
@@ -537,6 +536,9 @@ int sim_saveCalibrationParameters(char name[], void* intrinsic, void* distCoeffs
 
 int sim_loadCalibrationParameters(char name[], void** intrinsic, void** distCoeffs)
 {
+	if(!is_file_exist(name))
+		return RES_ERROR;
+
 	simMat* intrinsic_ = 0;
 	intrinsic_ = new simMat;
 	*intrinsic = intrinsic_;
