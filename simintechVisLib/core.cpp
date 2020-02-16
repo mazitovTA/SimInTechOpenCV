@@ -110,7 +110,10 @@ int retrieveImage(void* source, void** frame)
 	}
 	*cam >> m->data;
 	if (!m->data.data)
+	{
+		releaseSimMat(frame);
 		return RES_ERROR;
+	}
 	return RES_OK;
 }
 

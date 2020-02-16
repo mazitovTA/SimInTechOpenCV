@@ -46,6 +46,14 @@ struct VectorPoint2f {
 	}
 };
 
+struct VectorVectorPoint {
+	std::vector < std::vector<cv::Point>> data;
+	~VectorVectorPoint()
+	{
+		data.clear();
+	}
+}; 
+
 struct VectorVectorPoint2f {
 	std::vector < std::vector<cv::Point2f>> data;
 	~VectorVectorPoint2f()

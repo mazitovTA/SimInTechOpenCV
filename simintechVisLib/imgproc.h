@@ -274,3 +274,11 @@ EXPORT int sim_warpPerspective(void* src, void** dst,
  */
 EXPORT int sim_floodFill(void* src, void** dst,
 	int pX, int py, int ch1, int ch2, int ch3);
+
+
+EXPORT int sim_findContours(void* srcImage, void** contours);
+
+EXPORT int sim_selectContour(void* srcImage, void* contours, int index,
+	int* color, int width, int draw, void** dstItmage, void** result);
+
+EXPORT int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max);

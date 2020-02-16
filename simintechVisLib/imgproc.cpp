@@ -689,3 +689,147 @@ int sim_floodFill(void* src, void** dst, int pX, int pY, int ch1, int ch2, int c
 
 	return RES_OK;
 }
+
+int sim_findContours(void* src, void** contours)
+{
+	if (src == 0)
+	{
+		return RES_ERROR;
+	}
+
+	if (((simMat*)src)->data.channels() != 1)
+		return RES_ERROR;
+
+	VectorVectorPoint* m = 0;
+	if (*contours == 0)
+	{
+		m = new VectorVectorPoint;
+		*contours = m;
+	}
+	else
+	{
+		m = (VectorVectorPoint*)* contours;
+	}
+
+	vector<Vec4i> hierarchy;
+	findContours(((simMat*)src)->data, m->data, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+	return RES_OK;
+}
+
+// if index  =  -1 draw all contours
+int sim_selectContour(void* srcImage, void* contours, int index,
+	int* color, int width, int draw, void** dstItmage, void** result)
+{
+	if ((contours == 0) || (srcImage == 0))
+	{
+		return RES_ERROR;
+	}
+
+	VectorVectorPoint* input_countours = 0;
+	input_countours = (VectorVectorPoint*)contours;
+	int s = input_countours->data.size();
+
+	if (index >= s)
+	{
+		return RES_ERROR;
+	}
+
+	VectorVectorPoint* res_countours = 0;
+	if (*result == 0)
+	{
+		res_countours = new VectorVectorPoint;
+		*result = res_countours;
+	}
+	else
+	{
+		res_countours = (VectorVectorPoint*)* result;
+	}
+
+	if (index == -1)
+	{
+		res_countours->data = input_countours->data;
+	}
+	else
+	{
+		res_countours->data.clear();
+		res_countours->data.push_back(input_countours->data[index]);
+	}
+
+	if (draw == 0)
+		return RES_OK;
+
+
+	if ((((simMat*)srcImage)->data.channels() != 3) && (((simMat*)srcImage)->data.channels() != 1))
+		return RES_ERROR;
+
+	else if (draw == 1)
+	{
+		simMat* outFrame = 0;
+		if (*dstItmage == 0)
+		{
+			outFrame = new simMat;
+			*dstItmage = outFrame;
+		}
+		else
+		{
+			outFrame = (simMat*)* dstItmage;
+		}
+
+		if (((simMat*)srcImage)->data.channels() == 3)
+		{
+			outFrame->data = ((simMat*)srcImage)->data.clone();
+		}
+
+		if (((simMat*)srcImage)->data.channels() == 1)
+		{
+			cvtColor(((simMat*)srcImage)->data, outFrame->data, COLOR_GRAY2BGR);
+		}
+
+		for (int i = 0; i < res_countours->data.size(); i++)
+		{
+			Scalar c = Scalar(color[0], color[1], color[2]);
+			drawContours(outFrame->data, res_countours->data, i, c, 2, 8, -1, 0, Point());
+		}
+	}
+
+
+	return RES_OK;
+}
+
+int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max)
+{
+	if (src == 0)
+	{
+		return RES_ERROR;
+	}
+
+	VectorVectorPoint* input_countours = 0;
+	input_countours = (VectorVectorPoint*)dst;
+
+	VectorVectorPoint* res_countours = 0;
+	if (*dst == 0)
+	{
+		res_countours = new VectorVectorPoint;
+		*dst = res_countours;
+	}
+	else
+	{
+		res_countours = (VectorVectorPoint*)* dst;
+	}
+
+	res_countours->data.clear();
+
+	//(VectorVectorPoint*)contours
+	for (int i = 0; i < ((VectorVectorPoint*)src)->data.size(); i++)
+	{
+
+		float area = contourArea(((VectorVectorPoint*)src)->data[i]);
+		if ((area > * min) && (area < *max))
+		{
+			res_countours->data.push_back(((VectorVectorPoint*)src)->data[i]);
+		}
+	}
+
+	return RES_OK;
+}
