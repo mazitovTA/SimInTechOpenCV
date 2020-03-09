@@ -376,6 +376,7 @@ int sim_sobel(void* src, void** dst, int dx, int dy, int ksize, double scale, do
 	ksize < 3 ? ksize = 3 : ksize;
 	int ddepth = CV_16S;
 	Sobel(((simMat*)src)->data, m->data, ddepth, dx, dy, ksize, scale, delta, BORDER_DEFAULT);
+	convertScaleAbs(m->data, m->data);
 
 	return RES_OK;
 }
@@ -409,6 +410,7 @@ int sim_scharr(void* src, void** dst, int dx, int dy, double scale, double delta
 	}
 	int ddepth = CV_16S;
 	Scharr(((simMat*)src)->data, m->data, ddepth, dx, dy, scale, delta, BORDER_DEFAULT);
+	convertScaleAbs(m->data, m->data);
 
 	return RES_OK;
 }
@@ -434,6 +436,7 @@ int sim_laplacian(void* src, void** dst, int ksize, double scale, double delta)
 	ksize < 3 ? ksize = 3 : ksize;
 	int ddepth = CV_16S;
 	Laplacian(((simMat*)src)->data, m->data, ddepth, ksize, scale, delta, BORDER_DEFAULT);
+	convertScaleAbs(m->data, m->data);
 
 	return RES_OK;
 }
@@ -542,7 +545,7 @@ int sim_erode(void* src, void** dst, int ksize, int kShape)
 	return RES_OK;
 }
 
-int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, int interpolation)
+int sim_resize(void* src, void** dst, int ksizeX, int ksizeY, int interpolation)
 {
 	if (src == 0)
 	{
@@ -564,27 +567,6 @@ int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, int interpolation
 	return RES_OK;
 }
 
-int sim_resize(void* src, void** dst, int ksizeX, int ksizeY)
-{
-	if (src == 0)
-	{
-		return RES_ERROR;
-	}
-
-	simMat* m = 0;
-	if (*dst == 0)
-	{
-		m = new simMat;
-		*dst = m;
-	}
-	else
-	{
-		m = (simMat*)* dst;
-	}
-	resize(((simMat*)src)->data, m->data, Size(ksizeX, ksizeY));
-
-	return RES_OK;
-}
 
 int sim_warpAffine(void* src, void** dst,
 	double* M, int dsizeX, int dsizeY,
@@ -718,19 +700,29 @@ int sim_findContours(void* src, void** contours)
 }
 
 // if index  =  -1 draw all contours
-int sim_selectContour(void* srcImage, void* contours, int index,
-	int* color, int width, int draw, void** dstItmage, void** result)
+//int sim_selectContour(void* srcImage, void* contours, int index,	int* color, int width, bool draw, void** dstItmage, void** result)
+int sim_selectContour(void* srcImage, void* contours, void** dstItmage, void** result)
 {
+	*dstItmage = srcImage;
+	*result = contours;
+	return RES_OK;
+
+	int index = 6;
+	int color = 255;
+	int width = 10;
+	int draw = 1;
+
 	if ((contours == 0) || (srcImage == 0))
 	{
 		return RES_ERROR;
 	}
 
+
 	VectorVectorPoint* input_countours = 0;
 	input_countours = (VectorVectorPoint*)contours;
 	int s = input_countours->data.size();
 
-	if (index >= s)
+	if ((index >= s) || (index < -1))
 	{
 		return RES_ERROR;
 	}
@@ -756,14 +748,16 @@ int sim_selectContour(void* srcImage, void* contours, int index,
 		res_countours->data.push_back(input_countours->data[index]);
 	}
 
-	if (draw == 0)
+
+	//*dstItmage = srcImage;
+
+
+	if (draw == false)
 		return RES_OK;
 
 
-	if ((((simMat*)srcImage)->data.channels() != 3) && (((simMat*)srcImage)->data.channels() != 1))
-		return RES_ERROR;
 
-	else if (draw == 1)
+	if (draw == true)
 	{
 		simMat* outFrame = 0;
 		if (*dstItmage == 0)
@@ -776,21 +770,20 @@ int sim_selectContour(void* srcImage, void* contours, int index,
 			outFrame = (simMat*)* dstItmage;
 		}
 
-		if (((simMat*)srcImage)->data.channels() == 3)
-		{
-			outFrame->data = ((simMat*)srcImage)->data.clone();
-		}
+		outFrame->data = ((simMat*)srcImage)->data.clone();
 
-		if (((simMat*)srcImage)->data.channels() == 1)
+		if (outFrame->data.channels() == 1)
 		{
-			cvtColor(((simMat*)srcImage)->data, outFrame->data, COLOR_GRAY2BGR);
+			cvtColor(outFrame->data, outFrame->data, COLOR_GRAY2BGR);
 		}
-
+		
 		for (int i = 0; i < res_countours->data.size(); i++)
 		{
-			Scalar c = Scalar(color[0], color[1], color[2]);
-			drawContours(outFrame->data, res_countours->data, i, c, 2, 8, -1, 0, Point());
+			Scalar c = Scalar(0, color, 0);
+			drawContours(outFrame->data, res_countours->data, i, c, width, 8, -1, 0, Point());
 		}
+		
+
 	}
 
 
@@ -833,3 +826,4 @@ int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max
 
 	return RES_OK;
 }
+

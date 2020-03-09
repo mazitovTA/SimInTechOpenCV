@@ -232,16 +232,7 @@ src.size(), fx, and fy; the type of dst is the same as of src.
 @param fy scale factor along the vertical axis; when it equals 0
 @param interpolation interpolation method
  */
-EXPORT int sim_resizeP(void* src, void** dst, int ksizeX, int ksizeY, int interpolation);
-
-/** @brief Resizes an image.
-@param src input image.
-@param dst output image; it has the size dsize (when it is non-zero) or the size computed from
-src.size(), fx, and fy; the type of dst is the same as of src.
-@param ksizeX output image size;
-@param ksizeY output image size;
- */
-EXPORT int sim_resize(void* src, void** dst, int ksizeX, int ksizeY);
+EXPORT int sim_resize(void* src, void** dst, int ksizeX, int ksizeY, int interpolation);
 
 /** @brief Applies a perspective transformation to an image.
 @param src input image.
@@ -278,7 +269,6 @@ EXPORT int sim_floodFill(void* src, void** dst,
 
 EXPORT int sim_findContours(void* srcImage, void** contours);
 
-EXPORT int sim_selectContour(void* srcImage, void* contours, int index,
-	int* color, int width, int draw, void** dstItmage, void** result);
+EXPORT int sim_selectContour(void* srcImage, void* contours, void** dstItmage, void** result);
 
 EXPORT int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max);

@@ -55,9 +55,10 @@ int openImage(void** frame, char name[], int code)
 	{
 		m = (simMat*)* frame;
 	}
-	m->data = imread(name, code);
+	//m->data = imread(name, code);
+	m->data = imread(name, code);/*
 	if (!m->data.data)
-		return RES_ERROR;
+		return RES_ERROR;*/
 
 	return RES_OK;
 }
