@@ -115,12 +115,11 @@ EXPORT int matrixMUL(void* src1, void* src2, void** dst);
 
 
 //// Camera calibration functions
-int fidnCalibrationPoints(void** image_points, void** object_points, void* image, int numCornersHor, int numCornersVer);
+EXPORT int sim_fidnCalibrationPoints(void** image_points, void** object_points, void* image, void** dst,
+	int numCornersHor, int numCornersVer);
+EXPORT int sim_undistort(void* image, void** imageUndistorted, void* intrinsic, void* distCoeffs);
+EXPORT int sim_calibrateCamera(void* image_points, void* object_points, void* image, void** intrinsic, void** distCoeffs);
+EXPORT int sim_saveCalibrationParameters(char name[], void* intrinsic, void* distCoeffs);
+EXPORT int sim_loadCalibrationParameters(char name[], void** intrinsic, void** distCoeffs);
 
-int sim_undistort(void* image, void** imageUndistorted, void* intrinsic, void* distCoeffs);
 
-int sim_calibrateCamera(void* image_points, void* object_points, void* image, void** intrinsic, void** distCoeffs);
-
-
-int sim_saveCalibrationParameters(char name[], void** intrinsic, void** distCoeffs);
-int sim_loadCalibrationParameters(char name[], void** intrinsic, void** distCoeffs);

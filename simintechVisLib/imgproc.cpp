@@ -826,4 +826,3 @@ int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max
 
 	return RES_OK;
 }
-

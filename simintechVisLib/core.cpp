@@ -358,13 +358,29 @@ int matrixMUL(void* src1, void* src2, void** dst)
 	return RES_OK;
 }
 
-int fidnCalibrationPoints(void** image_points, void** object_points, void* image, int numCornersHor, int numCornersVer)
+int sim_fidnCalibrationPoints(void** image_points, void** object_points, void* image, void** dst,
+	int numCornersHor, int numCornersVer)
 {
+	
 	if (image == 0)
 	{
 		return RES_ERROR;
 	}
+
+
+	simMat* m = 0;
+	if (*dst == 0)
+	{
+		m = new simMat;
+		*dst = m;
+	}
+	else
+	{
+		m = (simMat*)* dst;
+	}
 	   
+	m->data = ((simMat*)image)->data.clone();	
+	
 	VectorVectorPoint2f* im_points = 0;
 	if (*image_points == 0)
 	{
@@ -393,7 +409,7 @@ int fidnCalibrationPoints(void** image_points, void** object_points, void* image
 	if (found)
 	{
 		cornerSubPix(gray_image, corners, Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
-		drawChessboardCorners(((simMat*)image)->data, board_sz, corners, found);
+		drawChessboardCorners(m->data, board_sz, corners, found);
 		im_points->data.push_back(corners);
 		obj_points->data.push_back(obj);
 	}
