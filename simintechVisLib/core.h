@@ -81,12 +81,6 @@ EXPORT void* getWindowHandle(char name[]);
 
 EXPORT int releaseSimMat(void** data);
 
-/*
-Open image from file
-codes
-	IMREAD_GRAYSCALE = 0,  //!< If set, always convert image to the single channel grayscale image (codec internal conversion).
-	IMREAD_COLOR = 1,  //!< If set, always convert image to the 3 channel BGR color image.
-*/
 EXPORT int openImage(void** frame, char name[], int code);
 EXPORT int showFrame(void* source, int delay, char name[]);
 EXPORT int openVideoSource(void** source, char address[]);

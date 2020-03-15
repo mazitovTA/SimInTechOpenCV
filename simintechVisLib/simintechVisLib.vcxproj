@@ -185,12 +185,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="algo.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="imgproc.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="algo.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="imgproc.cpp" />
