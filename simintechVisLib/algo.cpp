@@ -332,6 +332,23 @@ void detectLanes(cv::Mat& binaryinput, cv::Mat& drawinput, int roi_w, int wheel_
 	line(drawinput, m, Point(m.x, drawinput.rows), Scalar(0, 255, 0), 1, 8, 0);
 }
 
+vector<cv::Point> toPoint(vector<cv::Point2f>& in)
+{
+	vector<cv::Point> pts;
+
+	for (int i = 0; i < in.size(); ++i)
+	{
+		pts.push_back(Point(in[i].x, in[i].y));
+	}
+	return pts;
+}
+
+float correlation(cv::Mat& image1, cv::Mat& image2)
+{
+	cv::Mat corr;
+	cv::matchTemplate(image1, image2, corr, cv::TM_CCORR_NORMED);
+	return corr.at<float>(0, 0);  // corr only has one pixel
+}
 int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, int* rd, int* ld, void* drawinput)
 {
 	if ((binaryinput == 0) || (drawinput == 0))
@@ -343,4 +360,297 @@ int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, i
 	detectLanes(((simMat*)binaryinput)->data, ((simMat*)drawinput)->data, roi_w, wheel_h, rd, ld, numHorHist);
 	return RES_OK;
 
+}
+
+void normalize_contour(vector<Point>& inpit, vector<Point>& normalize, Size sz)
+{
+	Rect2f boundRect = boundingRect(inpit);
+	float x_ratio = (float)sz.width / boundRect.width;
+	float y_ratio = (float)sz.height / boundRect.height;
+
+	
+	normalize.resize(inpit.size());
+	Moments m = moments(inpit, true);
+	Point p(m.m10 / m.m00, m.m01 / m.m00);
+	
+	for (int j = 0; j < inpit.size(); ++j)
+	{
+		normalize[j].x = inpit[j].x - boundRect.x - p.x;
+		normalize[j].y = inpit[j].y - boundRect.y - p.y;
+		normalize[j].x *= x_ratio;
+		normalize[j].y *= y_ratio;
+	}
+}
+void normalizeAndPopulateTemplate(Mat input, vector<Point>& contour, Size sz, float alphaStep, int rotationsNum, vector<Mat>& templates, vector<Mat>& masks)
+{
+	int min_morm = 80;
+	int max_morm = 255;
+
+	templates.clear();
+	masks.clear();
+
+	Rect2f boundRect = boundingRect(contour);
+	Mat templ = input(boundRect);
+
+	Mat templMask(boundRect.size(), CV_8U, Scalar(0));
+	Mat templMasked(boundRect.size(), CV_8U, Scalar(0));
+
+	Moments m = moments(contour, true);
+	Point p(m.m10 / m.m00 - boundRect.x, m.m01 / m.m00 - boundRect.y);
+	vector<Point2f> normContour(contour.size());
+	for (int j = 0; j < contour.size(); ++j)
+	{
+		normContour[j].x = contour[j].x - boundRect.x;
+		normContour[j].y = contour[j].y - boundRect.y;
+	}
+
+	vector<cv::Point> pts = toPoint(normContour);
+	fillConvexPoly(templMask, &pts[0], pts.size(), Scalar(255));
+	templ.copyTo(templMasked, templMask);
+
+
+	Mat s;
+	resize(templMask, s, sz);
+	masks.push_back(s);
+
+	Mat t;
+	resize(templMasked, t, sz);
+	normalize(t, t, min_morm, max_morm, NORM_MINMAX, -1, s);
+	//imshow("normalize templ", t);
+	templates.push_back(t);
+
+	for (int i = 1; i < rotationsNum + 1; ++i)
+	{
+		//////////////////////// rotation
+		float angle = alphaStep * i;
+		float w = templMasked.size().width;
+		float h = templMasked.size().height;
+		Point2d center = Point2d(w / 2, h / 2);
+
+		Rect bounds = RotatedRect(center, templMasked.size(), angle).boundingRect();
+		Mat rot = getRotationMatrix2D(center, angle, 1.0);
+		Mat warped;
+		rot.at<double>(0, 2) += bounds.width / 2.0 - center.x;
+		rot.at<double>(1, 2) += bounds.height / 2.0 - center.y;
+		warpAffine(templMasked, warped, rot, bounds.size());
+
+		cv::Mat tr = rot.clone();
+		cv::Mat row = cv::Mat::ones(1, 3, CV_64F);  // 3 cols, 1 row
+		tr.push_back(row);
+		tr.at<double>(2, 0) = 0.0;
+		tr.at<double>(2, 1) = 0.0;
+		tr.at<double>(2, 2) = 1.0;
+		vector<Point2f> warpedContour;
+		perspectiveTransform(normContour, warpedContour, tr);
+
+
+		/////////////////////////////////////////////
+		Rect2f boundRect = boundingRect(warpedContour);
+		Mat templ = warped(boundRect);
+		Mat templMask(boundRect.size(), CV_8U, Scalar(0));
+		Mat templMasked(boundRect.size(), CV_8U, Scalar(0));
+
+		Moments m = moments(warpedContour, true);
+		Point p(m.m10 / m.m00 - boundRect.x, m.m01 / m.m00 - boundRect.y);
+		vector<Point2f> normContour(warpedContour.size());
+		for (int j = 0; j < warpedContour.size(); ++j)
+		{
+			normContour[j].x = warpedContour[j].x - boundRect.x;
+			normContour[j].y = warpedContour[j].y - boundRect.y;
+		}
+
+		vector<cv::Point> pts = toPoint(normContour);
+		fillConvexPoly(templMask, &pts[0], pts.size(), Scalar(255));
+		templ.copyTo(templMasked, templMask);
+		//////////////////////////////////////////
+
+		Mat s;
+		resize(templMask, s, sz);
+		masks.push_back(s);
+
+		Mat t;
+		resize(templMasked, t, sz);
+		normalize(t, t, min_morm, max_morm, NORM_MINMAX, -1, s);
+		templates.push_back(t);
+	}
+
+	for (int i = 1; i < rotationsNum + 1; ++i)
+	{
+		//////////////////////// rotation
+		float angle = -alphaStep * i;
+		float w = templMasked.size().width;
+		float h = templMasked.size().height;
+		Point2d center = Point2d(w / 2, h / 2);
+
+		Rect bounds = RotatedRect(center, templMasked.size(), angle).boundingRect();
+		Mat rot = getRotationMatrix2D(center, angle, 1.0);
+		Mat warped;
+		rot.at<double>(0, 2) += bounds.width / 2.0 - center.x;
+		rot.at<double>(1, 2) += bounds.height / 2.0 - center.y;
+		warpAffine(templMasked, warped, rot, bounds.size());
+
+		cv::Mat tr = rot.clone();
+		cv::Mat row = cv::Mat::ones(1, 3, CV_64F);  // 3 cols, 1 row
+		tr.push_back(row);
+		tr.at<double>(2, 0) = 0.0;
+		tr.at<double>(2, 1) = 0.0;
+		tr.at<double>(2, 2) = 1.0;
+		vector<Point2f> warpedContour;
+		perspectiveTransform(normContour, warpedContour, tr);
+
+		/////////////////////////////////////////////
+		Rect2f boundRect = boundingRect(warpedContour);
+		Mat templ = warped(boundRect);
+		Mat templMask(boundRect.size(), CV_8U, Scalar(0));
+		Mat templMasked(boundRect.size(), CV_8U, Scalar(0));
+
+		Moments m = moments(warpedContour, true);
+		Point p(m.m10 / m.m00 - boundRect.x, m.m01 / m.m00 - boundRect.y);
+		vector<Point2f> normContour(warpedContour.size());
+		for (int j = 0; j < warpedContour.size(); ++j)
+		{
+			normContour[j].x = warpedContour[j].x - boundRect.x;
+			normContour[j].y = warpedContour[j].y - boundRect.y;
+		}
+
+		vector<cv::Point> pts = toPoint(normContour);
+		fillConvexPoly(templMask, &pts[0], pts.size(), Scalar(255));
+		templ.copyTo(templMasked, templMask);
+		//////////////////////////////////////////
+
+		Mat s;
+		resize(templMask, s, sz);
+		masks.push_back(s);
+
+		Mat t;
+		resize(templMasked, t, sz);
+		normalize(t, t, min_morm, max_morm, NORM_MINMAX, -1, s);
+		templates.push_back(t);
+	}
+}
+
+int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame, vector<vector<Point>>& contours, int normalizedContourSizeX, int normalizedContourSizeY, bool useHull,
+	bool draw, double minCorrelation, int* numFound)
+{
+	if (templContour.size() < 1)
+		return RES_ERROR;
+	if (!frame.data || !templFrame.data)
+		return RES_ERROR;
+
+	Size normalizedContourSize(normalizedContourSizeX, normalizedContourSizeY);
+	Mat grayTempl, grayFrame;
+
+	if (templFrame.channels() == 3)
+		cvtColor(templFrame, grayTempl, COLOR_BGR2GRAY);
+	else
+		templFrame = grayTempl;
+
+	if (frame.channels() == 3)
+		cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
+	else
+		grayFrame = frame;
+
+
+	//////////////////////////////////////////////
+	vector<Point> templ_contour = templContour[0];
+	vector<Mat> templates;
+	vector<Mat> masks;
+	vector<vector<Point>> templ_hull_contour(1);
+	vector<vector<Point>> norm_templ_contour(1);
+	vector<vector<Point>> norm_templ_contours;
+
+	{
+		if (useHull)
+			convexHull((templ_contour), templ_hull_contour[0], false);
+		else
+			templ_hull_contour[0] = templ_contour;
+		normalizeAndPopulateTemplate(grayTempl, templ_hull_contour[0], normalizedContourSize, 1, 3, templates, masks);
+		normalize_contour(templ_hull_contour[0], norm_templ_contour[0], normalizedContourSize);
+	}
+
+	//////////////////////////////////////////////	
+	vector<vector<Point>> contours_hull;
+	//vector<vector<Point>> contours_normalize;
+	contours_hull.resize(contours.size());
+	if (useHull)
+	{
+		for (int i = 0; i < contours.size(); i++)
+		{
+			convexHull((contours[i]), contours_hull[i], false);
+		}
+	}
+	else
+		contours_hull = contours;
+
+	/*
+	contours_normalize.resize(contours.size());
+	for (int i = 0; i < contours.size(); i++)
+	{
+		if(contours_hull[i].size() > 3)
+			normalize_contour(contours_hull[i], contours_normalize[i], normalizedContourSize);
+	}*/
+
+	*numFound = 0;
+	for (int i = 0; i < contours_hull.size(); i++)
+	{
+		if (contours_hull[i].size() > 3)
+		{
+			Mat norm_patch;
+			Rect2f boundRect = boundingRect(contours_hull[i]);
+			Mat templ = grayFrame(boundRect);
+
+			Mat templMask(boundRect.size(), CV_8U, Scalar(0));
+			Mat templMasked(boundRect.size(), CV_8U, Scalar(0));
+
+			Moments m = moments(contours_hull[i], true);
+			Point p(m.m10 / m.m00 - boundRect.x, m.m01 / m.m00 - boundRect.y);
+			vector<Point2f> normContour(contours_hull[i].size());
+			for (int j = 0; j < contours_hull[i].size(); ++j)
+			{
+				normContour[j].x = contours_hull[i][j].x - boundRect.x;
+				normContour[j].y = contours_hull[i][j].y - boundRect.y;
+			}
+
+			vector<cv::Point> pts = toPoint(normContour);
+			fillConvexPoly(templMask, &pts[0], pts.size(), Scalar(255));
+			templ.copyTo(templMasked, templMask);
+
+			Mat s;
+			resize(templMask, s, normalizedContourSize);
+			Mat t;
+			resize(templMasked, t, normalizedContourSize);
+			normalize(t, norm_patch, 0, 255, NORM_MINMAX, -1, s);
+
+			for (int j = 0; j < templates.size(); ++j)
+			{
+				float corr = correlation(templates[j], norm_patch);
+				if (corr > minCorrelation)
+				{
+					(*numFound)++;
+					drawContours(frame, contours_hull, i, Scalar(0, 255, 0), 4, 8, 0, 0, Point());
+					break;
+				}
+			}
+
+		}
+	}
+	return RES_OK;
+}
+
+int sim_findSign(void* templFrame, void* templContour, void* frame, void* contours, int normalizedContourSizeX, 
+	int normalizedContourSizeY, int useHull, int draw, double minCorrelation, int* numFound)
+{
+	if (templFrame == 0 || templContour == 0 || frame == 0 || contours == 0)
+		return RES_ERROR;
+
+	int res = findShapes(((simMat*)templFrame)->data,
+		    ((VectorVectorPoint*)templContour)->data,
+			((simMat*)frame)->data,
+			((VectorVectorPoint*)contours)->data,
+			normalizedContourSizeX,
+			normalizedContourSizeY, 
+			useHull,
+			draw, minCorrelation, numFound);
+
+	return res;
 }

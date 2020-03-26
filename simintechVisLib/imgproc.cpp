@@ -601,6 +601,48 @@ int sim_warpAffine(void* src, void** dst,
 	return RES_OK;
 }
 
+int sim_flip(void* src, void** dst, int code)
+{
+	if (src == 0)
+	{
+		return RES_ERROR;
+	}
+
+	simMat* m = 0;
+	if (*dst == 0)
+	{
+		m = new simMat;
+		*dst = m;
+	}
+	else
+	{
+		m = (simMat*)* dst;
+	}
+	flip(((simMat*)src)->data, m->data, code);
+	return RES_OK;
+}
+
+int sim_rotate(void* src, void** dst, int code)
+{
+	if (src == 0)
+	{
+		return RES_ERROR;
+	}
+
+	simMat* m = 0;
+	if (*dst == 0)
+	{
+		m = new simMat;
+		*dst = m;
+	}
+	else
+	{
+		m = (simMat*)* dst;
+	}
+	rotate(((simMat*)src)->data, m->data, code);
+	return RES_OK;
+}
+
 int sim_warpPerspective(void* src, void** dst, double* srcPts, double* dstPts, int dsizeY, int dsizeX)
 {
 	if (src == 0)
@@ -700,17 +742,13 @@ int sim_findContours(void* src, void** contours)
 }
 
 // if index  =  -1 draw all contours
-//int sim_selectContour(void* srcImage, void* contours, int index,	int* color, int width, bool draw, void** dstItmage, void** result)
-int sim_selectContour(void* srcImage, void* contours, void** dstItmage, void** result)
+int sim_selectContour(void* srcImage, void* contours, int index, int red, int green,  int blue, int width, void** dstItmage, void** result)
 {
-	*dstItmage = srcImage;
-	*result = contours;
-	return RES_OK;
+	//*dstItmage = srcImage;
+	//*result = contours;
+	//return RES_OK;
 
-	int index = 6;
-	int color = 255;
-	int width = 10;
-	int draw = 1;
+	//index = 6;
 
 	if ((contours == 0) || (srcImage == 0))
 	{
@@ -747,46 +785,32 @@ int sim_selectContour(void* srcImage, void* contours, void** dstItmage, void** r
 		res_countours->data.clear();
 		res_countours->data.push_back(input_countours->data[index]);
 	}
-
-
+	
 	//*dstItmage = srcImage;
-
-
-	if (draw == false)
-		return RES_OK;
-
-
-
-	if (draw == true)
+	   
+	simMat* outFrame = 0;
+	if (*dstItmage == 0)
 	{
-		simMat* outFrame = 0;
-		if (*dstItmage == 0)
-		{
-			outFrame = new simMat;
-			*dstItmage = outFrame;
-		}
-		else
-		{
-			outFrame = (simMat*)* dstItmage;
-		}
-
-		outFrame->data = ((simMat*)srcImage)->data.clone();
-
-		if (outFrame->data.channels() == 1)
-		{
-			cvtColor(outFrame->data, outFrame->data, COLOR_GRAY2BGR);
-		}
-		
-		for (int i = 0; i < res_countours->data.size(); i++)
-		{
-			Scalar c = Scalar(0, color, 0);
-			drawContours(outFrame->data, res_countours->data, i, c, width, 8, -1, 0, Point());
-		}
-		
-
+		outFrame = new simMat;
+		*dstItmage = outFrame;
+	}
+	else
+	{
+		outFrame = (simMat*)* dstItmage;
 	}
 
+	outFrame->data = ((simMat*)srcImage)->data.clone();
 
+	if (outFrame->data.channels() == 1)
+	{
+		cvtColor(outFrame->data, outFrame->data, COLOR_GRAY2BGR);
+	}
+		
+	for (int i = 0; i < res_countours->data.size(); i++)
+	{
+		drawContours(outFrame->data, res_countours->data, i, cv::Scalar(blue, green, red), width);
+	}		
+		
 	return RES_OK;
 }
 

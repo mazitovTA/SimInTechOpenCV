@@ -256,6 +256,10 @@ EXPORT int sim_warpAffine(void* src, void** dst,
 EXPORT int sim_warpPerspective(void* src, void** dst,
 	double* srcPts, double* dstPts, int dsizeY, int dsizeX);
 
+
+EXPORT int sim_flip(void* src, void** dst, int code);
+EXPORT int sim_rotate(void* src, void** dst, int code);
+
 /** @brief Fills a connected component with the given color.
 @param src input 8-bit 3-channel image.
 @param dst output 8-bit 3-channel image.
@@ -268,7 +272,5 @@ EXPORT int sim_floodFill(void* src, void** dst,
 
 
 EXPORT int sim_findContours(void* srcImage, void** contours);
-
-EXPORT int sim_selectContour(void* srcImage, void* contours, void** dstItmage, void** result);
-
+EXPORT int sim_selectContour(void* srcImage, void* contours, int index, int red, int green, int blue, int width, void** dstItmage, void** result);
 EXPORT int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max);

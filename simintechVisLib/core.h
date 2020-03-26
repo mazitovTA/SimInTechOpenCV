@@ -107,7 +107,6 @@ EXPORT int perElementMULV(void* src1, double val, void** dst);
 //// Matrix operations
 EXPORT int matrixMUL(void* src1, void* src2, void** dst);
 
-
 //// Camera calibration functions
 EXPORT int sim_fidnCalibrationPoints(void** image_points, void** object_points, void* image, void** dst,
 	int numCornersHor, int numCornersVer);
