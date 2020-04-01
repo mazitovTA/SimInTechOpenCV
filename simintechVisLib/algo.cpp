@@ -385,16 +385,16 @@ void normalizeAndPopulateTemplate(Mat input, vector<Point>& contour, Size sz, fl
 {
 	int min_morm = 80;
 	int max_morm = 255;
-
+	
 	templates.clear();
 	masks.clear();
 
 	Rect2f boundRect = boundingRect(contour);
 	Mat templ = input(boundRect);
-
+	
 	Mat templMask(boundRect.size(), CV_8U, Scalar(0));
 	Mat templMasked(boundRect.size(), CV_8U, Scalar(0));
-
+	
 	Moments m = moments(contour, true);
 	Point p(m.m10 / m.m00 - boundRect.x, m.m01 / m.m00 - boundRect.y);
 	vector<Point2f> normContour(contour.size());
@@ -408,7 +408,7 @@ void normalizeAndPopulateTemplate(Mat input, vector<Point>& contour, Size sz, fl
 	fillConvexPoly(templMask, &pts[0], pts.size(), Scalar(255));
 	templ.copyTo(templMasked, templMask);
 
-
+	
 	Mat s;
 	resize(templMask, s, sz);
 	masks.push_back(s);
@@ -543,14 +543,14 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 	if (templFrame.channels() == 3)
 		cvtColor(templFrame, grayTempl, COLOR_BGR2GRAY);
 	else
-		templFrame = grayTempl;
+		grayTempl = templFrame;
 
 	if (frame.channels() == 3)
 		cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
 	else
 		grayFrame = frame;
 
-
+	
 	//////////////////////////////////////////////
 	vector<Point> templ_contour = templContour[0];
 	vector<Mat> templates;
@@ -564,10 +564,10 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 			convexHull((templ_contour), templ_hull_contour[0], false);
 		else
 			templ_hull_contour[0] = templ_contour;
-		normalizeAndPopulateTemplate(grayTempl, templ_hull_contour[0], normalizedContourSize, 1, 3, templates, masks);
+		normalizeAndPopulateTemplate(templFrame, templ_hull_contour[0], normalizedContourSize, 1, 3, templates, masks);
 		normalize_contour(templ_hull_contour[0], norm_templ_contour[0], normalizedContourSize);
 	}
-
+	
 	//////////////////////////////////////////////	
 	vector<vector<Point>> contours_hull;
 	//vector<vector<Point>> contours_normalize;
@@ -581,7 +581,7 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 	}
 	else
 		contours_hull = contours;
-
+	
 	/*
 	contours_normalize.resize(contours.size());
 	for (int i = 0; i < contours.size(); i++)
@@ -590,6 +590,7 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 			normalize_contour(contours_hull[i], contours_normalize[i], normalizedContourSize);
 	}*/
 
+	vector<Point> res_center;
 	*numFound = 0;
 	for (int i = 0; i < contours_hull.size(); i++)
 	{
@@ -626,7 +627,21 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 				float corr = correlation(templates[j], norm_patch);
 				if (corr > minCorrelation)
 				{
+
+					Point cx(boundRect.x + boundRect.width / 2, boundRect.y + boundRect.height / 2);
+					bool is_same = 0;
+					for (int k = 0; k < res_center.size(); ++k)
+					{
+						if (sqrt((res_center[k].x - cx.x) * (res_center[k].x - cx.x) + (res_center[k].y - cx.y) * (res_center[k].y - cx.y)) < 20)
+						{
+							is_same = 1;
+							break;
+						}
+					}
+					if (is_same)
+						continue;
 					(*numFound)++;
+					res_center.push_back(cx);
 					drawContours(frame, contours_hull, i, Scalar(0, 255, 0), 4, 8, 0, 0, Point());
 					break;
 				}
