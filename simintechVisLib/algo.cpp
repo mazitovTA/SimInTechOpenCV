@@ -188,8 +188,8 @@ void findHistogrammMaximums(cv::Mat& filter_res, std::vector<cv::Point>& feature
 		featurePointsRight[r].x += pt.x - hist_step_y / 2;
 		featurePointsRight[r].y += pt.y;
 	}
-	
 }
+
 std::vector<float> fitLine(vector<Point>& pts, Mat& mask) {
 
 	int ransacItr = 200;
@@ -216,7 +216,8 @@ std::vector<float> fitLine(vector<Point>& pts, Mat& mask) {
 		k[0] = (points[0].y - points[1].y); //A
 		k[1] = (points[1].x - points[0].x); //B
 		k[2] = (points[0].x * points[1].y) - (points[1].x * points[0].y); //C
-		
+
+
 		float A = k[0];
 		float B = k[1];
 		float C = k[2];
@@ -265,8 +266,7 @@ std::vector<float> fitLine(vector<Point>& pts, Mat& mask) {
 }
 
 void detectLanes(cv::Mat& binaryinput, cv::Mat& drawinput, int roi_w, int wheel_h, int* rd, int* ld, int numHorHist)
-{	
-	
+{		
 	std::vector<cv::Point> featurePointsLeft;
 	std::vector<cv::Point> featurePointsRight;
 
@@ -286,8 +286,9 @@ void detectLanes(cv::Mat& binaryinput, cv::Mat& drawinput, int roi_w, int wheel_
 	fillContAll.push_back(rightTriangle);
 	cv::fillPoly(binaryinput, fillContAll, cv::Scalar(0));
 
+	
 	findHistogrammMaximums(binaryinput, featurePointsLeft, featurePointsRight, numHorHist);
-
+	
 	*rd = featurePointsRight.size();
 	*ld = featurePointsLeft.size();
 	
@@ -351,6 +352,7 @@ float correlation(cv::Mat& image1, cv::Mat& image2)
 }
 int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, int* rd, int* ld, void* drawinput)
 {
+	
 	if ((binaryinput == 0) || (drawinput == 0))
 		return RES_ERROR;
 
@@ -531,7 +533,7 @@ void normalizeAndPopulateTemplate(Mat input, vector<Point>& contour, Size sz, fl
 
 int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame, vector<vector<Point>>& contours, int normalizedContourSizeX, int normalizedContourSizeY, bool useHull,
 	bool draw, double minCorrelation, int* numFound)
-{
+{	
 	if (templContour.size() < 1)
 		return RES_ERROR;
 	if (!frame.data || !templFrame.data)
@@ -558,13 +560,13 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 	vector<vector<Point>> templ_hull_contour(1);
 	vector<vector<Point>> norm_templ_contour(1);
 	vector<vector<Point>> norm_templ_contours;
-
+	
 	{
 		if (useHull)
 			convexHull((templ_contour), templ_hull_contour[0], false);
 		else
 			templ_hull_contour[0] = templ_contour;
-		normalizeAndPopulateTemplate(templFrame, templ_hull_contour[0], normalizedContourSize, 1, 3, templates, masks);
+		normalizeAndPopulateTemplate(grayTempl, templ_hull_contour[0], normalizedContourSize, 1, 3, templates, masks);
 		normalize_contour(templ_hull_contour[0], norm_templ_contour[0], normalizedContourSize);
 	}
 	
@@ -582,14 +584,6 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 	else
 		contours_hull = contours;
 	
-	/*
-	contours_normalize.resize(contours.size());
-	for (int i = 0; i < contours.size(); i++)
-	{
-		if(contours_hull[i].size() > 3)
-			normalize_contour(contours_hull[i], contours_normalize[i], normalizedContourSize);
-	}*/
-
 	vector<Point> res_center;
 	*numFound = 0;
 	for (int i = 0; i < contours_hull.size(); i++)
@@ -654,9 +648,9 @@ int findShapes(Mat& templFrame, vector<vector<Point>>& templContour, Mat& frame,
 
 int sim_findSign(void* templFrame, void* templContour, void* frame, void* contours, int normalizedContourSizeX, 
 	int normalizedContourSizeY, int useHull, int draw, double minCorrelation, int* numFound)
-{
+{	
 	if (templFrame == 0 || templContour == 0 || frame == 0 || contours == 0)
-		return RES_ERROR;
+		return RES_ERROR;	
 
 	int res = findShapes(((simMat*)templFrame)->data,
 		    ((VectorVectorPoint*)templContour)->data,
