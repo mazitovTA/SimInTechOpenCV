@@ -7,6 +7,8 @@
 #include "core.h"
 #include <fstream>
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 bool is_file_exist(const char* fileName)
 {
 	std::ifstream infile(fileName);
@@ -572,4 +574,127 @@ int sim_loadCalibrationParameters(char name[], void** intrinsic, void** distCoef
 	fs2["distCoeffs"] >> distCoeffs_->data;
 
 	return RES_OK;
+}
+
+int um_init(void** server_socket, void** client_socket, void** frame, int port)
+{
+	WSADATA wsa;
+	SOCKET* s = new SOCKET;
+	*server_socket = s;
+	SOCKET* new_socket = new SOCKET;
+	*client_socket = new_socket;
+	struct sockaddr_in server, client;
+	int c;
+	camera_info camera;
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+	{
+		printf("Failed. Error Code : %d", WSAGetLastError());
+		return RES_ERROR;
+	}
+
+	//Create a socket
+	if ((*s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
+	{
+		printf("Could not create socket : %d", WSAGetLastError());
+		return RES_ERROR;
+	}
+
+	//Prepare the sockaddr_in structure
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(port);
+
+
+	//в неблокирующий режим 
+	unsigned long block = 1;
+	int res = ioctlsocket(*s, FIONBIO, &block);
+	WSAGetLastError();
+
+	//Bind
+	int iResult = 0;
+	iResult = ::bind(*s, (struct sockaddr*) & server, sizeof(server));
+	if (iResult == SOCKET_ERROR)
+	{
+		printf("Bind failed with error code : %d", WSAGetLastError());
+		return RES_ERROR;
+	}
+
+	listen(*s, 3);
+
+	c = sizeof(struct sockaddr_in);
+	for (int i = 0; i < 11; i++)
+	{
+		*new_socket = accept(*s, (struct sockaddr*) & client, &c);
+		if (*new_socket == INVALID_SOCKET)
+		{
+			printf("accept failed with error code : %d \n", WSAGetLastError());
+			Sleep(1000);
+			if (i == 10)
+				return RES_ERROR;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//назад в блокирующий режим
+	block = 0;
+	res = ioctlsocket(*new_socket, FIONBIO, &block);
+
+	const int info_buf_size = 84;
+	char info_buf[info_buf_size];
+	int retval;
+	{
+		retval = recv(*new_socket, info_buf, info_buf_size, MSG_WAITALL);
+		for (int i = 0; i < info_buf_size; i += 4)
+		{
+			int* var = (int*)(&info_buf[i]);
+			*var = ntohl(*var);
+		}
+		memcpy(&camera, &info_buf[0], 84);
+	}
+	int image_buf_size = camera.ImageResolution_x * camera.ImageResolution_y * 3;
+	char* image_buf = new char[image_buf_size];
+
+	{
+		retval = recv(*new_socket, info_buf, info_buf_size, MSG_WAITALL);
+		for (int i = 0; i < info_buf_size; i += 4)
+		{
+			int* var = (int*)(&info_buf[i]);
+			*var = ntohl(*var);
+		}
+	}
+	
+	simMat* m = 0;
+	m = new simMat;
+	*frame = m;
+
+	if (camera.Colors == 1)
+		m->data = cv::Mat(camera.ImageResolution_y, camera.ImageResolution_x, CV_8UC3, cv::Scalar(255, 0, 0));
+	else if (camera.Colors == 0)
+		m->data = cv::Mat(camera.ImageResolution_y, camera.ImageResolution_x, CV_8UC1, cv::Scalar(255, 0, 0));
+
+	return RES_OK;
+
+}
+
+int um_get_frame(void* socket, void* frame)
+{
+	SOCKET* s = (SOCKET*)socket;
+	cv::Mat img = ((simMat*)frame)->data;
+	int size = img.cols * img.rows * img.channels();
+	int retval = recv(*s, (char*)img.data, size, MSG_WAITALL);
+	if (retval == 0)
+		return RES_ERROR;
+	cv::flip(img, img, 0);
+	return RES_OK;
+}
+
+void um_release_socket(void* socket)
+{
+	SOCKET* s = (SOCKET*)socket;
+	closesocket(*s);
+	WSACleanup();
 }
