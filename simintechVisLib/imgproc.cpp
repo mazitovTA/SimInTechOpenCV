@@ -850,3 +850,20 @@ int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max
 
 	return RES_OK;
 }
+
+
+int sim_countContours(void* contours, int* count)
+{
+	if (contours == 0)
+	{
+		*count = 0;
+		return RES_OK;
+	}
+
+	VectorVectorPoint* input_countours = 0;
+	input_countours = (VectorVectorPoint*)contours;
+	int s = input_countours->data.size();
+	*count = s;
+
+	return RES_OK;
+}

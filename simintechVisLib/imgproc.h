@@ -274,3 +274,5 @@ EXPORT int sim_floodFill(void* src, void** dst,
 EXPORT int sim_findContours(void* srcImage, void** contours);
 EXPORT int sim_selectContour(void* srcImage, void* contours, int index, int red, int green, int blue, int width, void** dstItmage, void** result);
 EXPORT int sim_minMaxAreaContoursFilter(void* src, void** dst, double* min, double* max);
+
+EXPORT int sim_countContours(void* contours, int* count);

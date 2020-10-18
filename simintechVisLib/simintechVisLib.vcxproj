@@ -79,8 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>ocv\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\OpenCVLib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>H:\LIBS\opencv_3.4.10\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>H:\LIBS\opencv_3.4.10\lib;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\bin\</OutDir>
     <IntDir>..\..\..\tmp\sitVisLib\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -93,8 +93,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>ocv\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\OpenCVLib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>H:\LIBS\opencv_3.4.10\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>H:\LIBS\opencv_3.4.10\lib;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\bin\</OutDir>
     <IntDir>..\..\..\tmp\sitVisLib\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
