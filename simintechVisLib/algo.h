@@ -6,7 +6,7 @@ using namespace cv;
 using namespace std;
 
 
-EXPORT int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, int* rd, int* ld, void* drawinput);
+EXPORT int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, int* rd, int* ld, void* drawinput, int* leftPointNumber, int* rightPointNumber);
 EXPORT int sim_findSign(void* templFrame, void* templContour, void* frame, void* contours,
 	int normalizedContourSizeX,
 	int normalizedContourSizeY,

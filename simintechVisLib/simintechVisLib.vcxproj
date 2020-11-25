@@ -79,8 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>H:\LIBS\opencv_3.4.10\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>H:\LIBS\opencv_3.4.10\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>I:\opencv\include;$(IncludePath)</IncludePath>
+    <LibraryPath>I:\opencv\staticlib\debug;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\bin\</OutDir>
     <IntDir>..\..\..\tmp\sitVisLib\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -93,8 +93,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>H:\LIBS\opencv_3.4.10\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>H:\LIBS\opencv_3.4.10\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>I:\opencv\include;$(IncludePath)</IncludePath>
+    <LibraryPath>I:\opencv\staticlib\release;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\bin\</OutDir>
     <IntDir>..\..\..\tmp\sitVisLib\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -127,14 +127,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>opencv_world3410d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ippicvmt.lib;opencv_world3412d.lib;IlmImfd.lib;ippiwd.lib;ittnotifyd.lib;libjasperd.lib;libjpeg-turbod.lib;libprotobufd.lib;zlibd.lib;libpngd.lib;libtiffd.lib;libwebpd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>opencv_world346d.lib;%(AdditionalDependencies)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -181,7 +181,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ippicvmt.lib;opencv_world3412.lib;IlmImf.lib;ippiw.lib;ittnotify.lib;libjasper.lib;libjpeg-turbo.lib;libprotobuf.lib;zlib.lib;libpng.lib;libtiff.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>opencv_world346.lib;%(AdditionalDependencies)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

@@ -144,7 +144,6 @@ void findHistogrammMaximums(cv::Mat& filter_res, std::vector<cv::Point>& feature
 	// уточнить положение по среднему значеиню
 	for (int r = 0; r < featurePointsLeft.size(); r++) {
 
-
 		int xCoord = featurePointsLeft[r].x - hist_step_y / 2;
 		int width = hist_step_y;
 		if (xCoord < 0)
@@ -190,13 +189,14 @@ void findHistogrammMaximums(cv::Mat& filter_res, std::vector<cv::Point>& feature
 	}
 }
 
-std::vector<float> fitLine(vector<Point>& pts, Mat& mask) {
+std::vector<float> fitLine(vector<Point>& pts, Mat& mask, int* pointNumber) {
 
 	int ransacItr = 200;
 	std::vector<std::vector<float>> K;
 
 	std::vector<int> size;
 
+	*pointNumber = 0;
 
 	for (int itr = 0; itr < ransacItr; itr++) {
 		std::vector<Point> points;
@@ -247,7 +247,7 @@ std::vector<float> fitLine(vector<Point>& pts, Mat& mask) {
 		K.push_back(k);
 	}
 
-	int maxSize = -1;
+	int maxSize = 0;
 	int minIdx = -1;
 
 	for (int j = 0; j < size.size(); j++) {
@@ -256,16 +256,17 @@ std::vector<float> fitLine(vector<Point>& pts, Mat& mask) {
 			minIdx = j;
 		}
 	}
+	*pointNumber = maxSize;
+
 	if (minIdx == -1)
 	{
 		std::vector<float> k;
 		return k;
 	}
-
 	return K[minIdx];
 }
 
-void detectLanes(cv::Mat& binaryinput, cv::Mat& drawinput, int roi_w, int wheel_h, int* rd, int* ld, int numHorHist)
+void detectLanes(cv::Mat& binaryinput, cv::Mat& drawinput, int roi_w, int wheel_h, int* rd, int* ld, int numHorHist, int* leftPointNumber, int* rightPointNumber)
 {		
 	std::vector<cv::Point> featurePointsLeft;
 	std::vector<cv::Point> featurePointsRight;
@@ -288,12 +289,9 @@ void detectLanes(cv::Mat& binaryinput, cv::Mat& drawinput, int roi_w, int wheel_
 
 	
 	findHistogrammMaximums(binaryinput, featurePointsLeft, featurePointsRight, numHorHist);
-	
-	*rd = featurePointsRight.size();
-	*ld = featurePointsLeft.size();
-	
-	std::vector<float> leftLine = fitLine(featurePointsLeft, binaryinput);
-	std::vector<float> rightLine = fitLine(featurePointsRight, binaryinput);
+		
+	std::vector<float> leftLine = fitLine(featurePointsLeft, binaryinput, leftPointNumber);
+	std::vector<float> rightLine = fitLine(featurePointsRight, binaryinput, rightPointNumber);
 
 	int cx = binaryinput.cols / 2;
 	int cy = binaryinput.rows - wheel_h;
@@ -350,7 +348,7 @@ float correlation(cv::Mat& image1, cv::Mat& image2)
 	cv::matchTemplate(image1, image2, corr, cv::TM_CCORR_NORMED);
 	return corr.at<float>(0, 0);  // corr only has one pixel
 }
-int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, int* rd, int* ld, void* drawinput)
+int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, int* rd, int* ld, void* drawinput, int* leftPointNumber, int* rightPointNumber)
 {
 	
 	if ((binaryinput == 0) || (drawinput == 0))
@@ -359,7 +357,7 @@ int sim_detectLanes(void* binaryinput, int numHorHist, int roi_w, int wheel_h, i
 	if (((simMat*)binaryinput)->data.cols < roi_w *2)
 		return RES_ERROR;
 	
-	detectLanes(((simMat*)binaryinput)->data, ((simMat*)drawinput)->data, roi_w, wheel_h, rd, ld, numHorHist);
+	detectLanes(((simMat*)binaryinput)->data, ((simMat*)drawinput)->data, roi_w, wheel_h, rd, ld, numHorHist, leftPointNumber, rightPointNumber);
 	return RES_OK;
 
 }
